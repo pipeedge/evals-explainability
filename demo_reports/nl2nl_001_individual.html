@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explainability Report - nl2nl_001</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; background-color: #f9f9f9; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        h3 { color: #777; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .metadata { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="metadata">
+            <strong>Analysis Metadata:</strong><br>
+            Confidence: 0.303 | 
+            Processing Time: 63.23s | 
+            Quality Score: 0.937
+        </div>
+        <h1>Explainability Report: nl2nl_001<br></h1></h2></h3>
+<br></h2></h3>
+#<h1>1. Summary<br></h2></h3>
+<br></h2></h3>
+- <strong>Input ID:</strong> `nl2nl_001`<br></h2></h3>
+- **Task Type:** `NL2NL`<br></h2></h3>
+- **Status:** **FAIL**<br></h2></h3>
+- **Failure Category:** `Loss of Key Information`<br></h2></h3>
+- **Confidence Score:** `0.600`<br></h2></h3>
+- **Analysis Timestamp:** `2025-08-07 14:09:39`<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>2. Detailed Analysis<br></h2></h3>
+<br></h2></h3>
+##<h1>Input<br></h2></h3>
+<br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+        Climate change is one of the most pressing issues of our time. Rising global temperatures <br></h2></h3>
+        have led to melting ice caps, rising sea levels, and extreme weather events. Scientists <br></h2></h3>
+        have established clear evidence that human activities, particularly the burning of fossil <br></h2></h3>
+        fuels, are the primary cause of recent climate change. The Intergovernmental Panel on <br></h2></h3>
+        Climate Change (IPCC) reports that global temperatures have risen by approximately 1.1°C <br></h2></h3>
+        since pre-industrial times. Urgent action is needed to reduce greenhouse gas emissions <br></h2></h3>
+        and transition to renewable energy sources to limit further warming to 1.5°C above <br></h2></h3>
+        pre-industrial levels.<br></h2></h3>
+        <br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+##<h1>Model Output (Failed)<br></h2></h3>
+<br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+        Climate change is happening and it's getting warmer. Ice is melting and there are more <br></h2></h3>
+        storms. Some scientists think humans might be involved through cars and factories. <br></h2></h3>
+        The temperature has gone up by about 2°C in the last 100 years. We should probably <br></h2></h3>
+        do something about it eventually.<br></h2></h3>
+        <br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+##<h1>Reference Output (Correct)<br></h2></h3>
+<br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+        Climate change, driven primarily by human activities like fossil fuel burning, has caused <br></h2></h3>
+        global temperatures to rise by 1.1°C since pre-industrial times. This has resulted in <br></h2></h3>
+        melting ice caps, rising sea levels, and extreme weather events. The IPCC emphasizes <br></h2></h3>
+        the urgent need to reduce greenhouse gas emissions and transition to renewable energy <br></h2></h3>
+        to limit warming to 1.5°C above pre-industrial levels.<br></h2></h3>
+        <br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>3. Root Cause Analysis<br></h2></h3>
+<br></h2></h3>
+##<h1>Root Cause Analysis Report<br></h2></h3>
+<br></h2></h3>
+**1. Analysis of Input Intent:**<br></h2></h3>
+<br></h2></h3>
+The input data presents a clear and concise passage about climate change, its causes, effects, and the urgent need for action to mitigate its impacts. The primary function of this input is to inform or educate the reader about the pressing issue of climate change. Key constraints or requirements implicit in this input include accuracy, specificity, and urgency.<br></h2></h3>
+<br></h2></h3>
+**2. Key Discrepancies Observed:**<br></h2></h3>
+<br></h2></h3>
+- **Omission of Specific Data:** The model output fails to mention specific data points such as the 1.1°C rise in global temperatures since pre-industrial times.<br></h2></h3>
+- **Lack of Clear Attribution:** Unlike the reference output, the failed model does not clearly attribute climate change to human activities like fossil fuel burning.<br></h2></h3>
+- **Missing Emphasis on Urgency and Action:** The model's response lacks a sense of urgency and does not emphasize the need for action as strongly as the reference output. It also omits specific targets like limiting warming to 1.5°C above pre-industrial levels.<br></h2></h3>
+- **Incorrect Temperature Increase:** The model incorrectly states that global temperatures have risen by about 2°C in the last 100 years, which is not present in the input or correct output.<br></h2></h3>
+<br></h2></h3>
+**3. Explanation of Failure:**<br></h2></h3>
+<br></h2></h3>
+These discrepancies align with the "Loss of Key Information" failure category because they reflect a significant reduction in specificity and accuracy from the original input to the model's output. The failed output simplifies and distorts key information provided in the input, leading to a loss of critical details that are essential for understanding the urgency and implications of climate change.<br></h2></h3>
+<br></h2></h3>
+**4. Inferred Root Cause:**<br></h2></h3>
+<br></h2></h3>
+The root cause of this failure is likely due to the model's inability to retain and accurately convey detailed information from the input passage. This could be attributed to several factors:<br></h2></h3>
+<br></h2></h3>
+- **Insufficient Training Data:** The model may not have been trained on a diverse enough dataset that includes complex, detailed passages about scientific topics like climate change.<br></h2></h3>
+  <br></h2></h3>
+- **Inadequate Attention Mechanism:** The model's attention mechanism might not be robust enough to focus on and retain key information from the input, leading to a loss of important details in the output.<br></h2></h3>
+<br></h2></h3>
+- **Over-Simplification Strategy:** The model may employ an over-simplification strategy to make outputs more readable or concise, which inadvertently leads to the omission of critical information.<br></h2></h3>
+<br></h2></h3>
+Addressing these issues through adjusting the training dataset, enhancing the attention mechanism, and fine-tuning the model's generation strategies could improve its performance on similar tasks.<br></h2></h3>
+<br></h2></h3>
+##<h1>Causal Factors<br></h2></h3>
+<br></h2></h3>
+No significant causal factors identified.<br></h2></h3>
+<br></h2></h3>
+##<h1>Counterfactual Analysis<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Scenario 1: output_length_control**<br></h2></h3>
+- **Description:** Adjust output length to match reference (455 characters)<br></h2></h3>
+- **Expected Impact:** 0.500<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Scenario 2: attention_regulation**<br></h2></h3>
+- **Description:** Apply attention regularization to improve focus distribution<br></h2></h3>
+- **Expected Impact:** 0.800<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Scenario 3: attention_regulation**<br></h2></h3>
+- **Description:** Apply attention regularization to improve focus distribution<br></h2></h3>
+- **Expected Impact:** 0.800<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>4. Actionable Recommendations<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+##<h1>Prompt Engineering<br></h2></h3>
+<br></h2></h3>
+**1. Counterfactual Intervention: attention_regulation**<br></h2></h3>
+- **Description:** Apply attention regularization to improve focus distribution<br></h2></h3>
+- **Expected Impact:** 0.80<br></h2></h3>
+- **Implementation Effort:** 0.40<br></h2></h3>
+- **Confidence:** 0.00<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Analyze counterfactual scenario<br></h2></h3>
+- Implement proposed intervention<br></h2></h3>
+- Validate effectiveness<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**2. LLM-Generated Prompt Engineering**<br></h2></h3>
+- **Description:** Specify Key Information<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+- **Implementation Effort:** 0.50<br></h2></h3>
+- **Confidence:** 0.42<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Specify Key Information<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+##<h1>Data Augmentation<br></h2></h3>
+<br></h2></h3>
+**1. LLM-Generated Data Augmentation**<br></h2></h3>
+- **Description:** Include Scientific Passages with Varied Complexity<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+- **Implementation Effort:** 0.50<br></h2></h3>
+- **Confidence:** 0.42<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Include Scientific Passages with Varied Complexity<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+##<h1>Model Configuration<br></h2></h3>
+<br></h2></h3>
+**1. LLM-Generated Model Configuration**<br></h2></h3>
+- **Description:** Adjust Attention Mechanism<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+- **Implementation Effort:** 0.50<br></h2></h3>
+- **Confidence:** 0.42<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Adjust Attention Mechanism<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>5. Technical Analysis<br></h2></h3>
+<br></h2></h3>
+##<h1>Classification Details<br></h2></h3>
+- **Primary Category:** Loss of Key Information<br></h2></h3>
+- **Sub-categories:** low_severity, simple_failure, llm_validated_Loss of Key Information<br></h2></h3>
+- **Semantic Features:** Vector length: 11, Max value: 0.096<br></h2></h3>
+- **Attention Patterns:** Attention variance: 0.001, Max attention: 0.202<br></h2></h3>
+<br></h2></h3>
+##<h1>Confidence Metrics<br></h2></h3>
+- **Classification Confidence:** 0.600<br></h2></h3>
+- **Root Cause Confidence:** 0.000<br></h2></h3>
+- **Overall Confidence:** 0.315<br></h2></h3>
+<br></h2></h3>
+##<h1>Performance Metrics<br></h2></h3>
+- **Processing Time:** 0.00 seconds<br></h2></h3>
+- **Quality Score:** 0.000<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>6. Implementation Roadmap<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Phase 1**<br></h2></h3>
+- **Recommendations:** 2 items<br></h2></h3>
+- **Total Effort:** 0.90<br></h2></h3>
+- **Expected Impact:** 0.70<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Phase 2**<br></h2></h3>
+- **Recommendations:** 2 items<br></h2></h3>
+- **Total Effort:** 1.00<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+*Report generated by LLM Explainability Framework v1.0.0*<br></h2></h3>
+
+    </div>
+</body>
+</html>
+        

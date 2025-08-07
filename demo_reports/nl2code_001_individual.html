@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explainability Report - nl2code_001</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; background-color: #f9f9f9; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        h3 { color: #777; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .metadata { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="metadata">
+            <strong>Analysis Metadata:</strong><br>
+            Confidence: 0.303 | 
+            Processing Time: 70.71s | 
+            Quality Score: 0.953
+        </div>
+        <h1>Explainability Report: nl2code_001<br></h1></h2></h3>
+<br></h2></h3>
+#<h1>1. Summary<br></h2></h3>
+<br></h2></h3>
+- <strong>Input ID:</strong> `nl2code_001`<br></h2></h3>
+- **Task Type:** `NL2CODE`<br></h2></h3>
+- **Status:** **FAIL**<br></h2></h3>
+- **Failure Category:** `Logical Error`<br></h2></h3>
+- **Confidence Score:** `0.600`<br></h2></h3>
+- **Analysis Timestamp:** `2025-08-07 14:10:50`<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>2. Detailed Analysis<br></h2></h3>
+<br></h2></h3>
+##<h1>Input<br></h2></h3>
+<br></h2></h3>
+<pre><code><br></h2></h3>
+Write a Python function that calculates the factorial of a number using recursion. The function should handle edge cases for negative numbers and zero.<br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+##<h1>Model Output (Failed)<br></h2></h3>
+<br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+def factorial(n):<br></h2></h3>
+    if n == 0:<br></h2></h3>
+        return 1<br></h2></h3>
+    return n * factorial(n - 1)<br></h2></h3>
+        <br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+##<h1>Reference Output (Correct)<br></h2></h3>
+<br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+def factorial(n):<br></h2></h3>
+    if n < 0:<br></h2></h3>
+        raise ValueError("Factorial is not defined for negative numbers")<br></h2></h3>
+    if n == 0 or n == 1:<br></h2></h3>
+        return 1<br></h2></h3>
+    return n * factorial(n - 1)<br></h2></h3>
+        <br></h2></h3>
+<pre><code><br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>3. Root Cause Analysis<br></h2></h3>
+<br></h2></h3>
+##<h1>Root Cause Analysis Report<br></h2></h3>
+<br></h2></h3>
+**1. Analysis of Input Intent:**<br></h2></h3>
+<br></h2></h3>
+The input prompt requires writing a Python function that calculates the factorial of a number using recursion. The function should also handle edge cases for negative numbers and zero, indicating that the user wants to ensure robustness in the calculation.<br></h2></h3>
+<br></h2></h3>
+**2. Key Discrepancies Observed:**<br></h2></h3>
+* The model output lacks error handling for negative numbers.<br></h2></h3>
+* The reference output checks if `n` is less than 0 and raises a ValueError with an appropriate message when true.<br></h2></h3>
+* Both outputs handle the base case of `n == 0`, but the correct handling of `n == 1` as also returning 1 (a common convention in factorial calculations) is present only in the reference output.<br></h2></h3>
+<br></h2></h3>
+**3. Explanation of Failure:**<br></h2></h3>
+<br></h2></h3>
+The failure to include error handling for negative inputs and the specific handling of `n == 1` aligns with the "Logical Error" category because it indicates a mistake in the program's logic flow. This error arises from the model misunderstanding or misinterpreting the requirements specified in the input prompt, particularly regarding edge cases.<br></h2></h3>
+<br></h2></h3>
+**4. Inferred Root Cause:**<br></h2></h3>
+<br></h2></h3>
+The root cause of this failure appears to be the model's inability to fully comprehend and adhere to all constraints provided in the problem statement. Specifically, it seems the model did not grasp the necessity of handling negative inputs with an error or the factorial convention for `n == 1`. This misunderstanding led to a logically flawed implementation that, while partially correct (calculating factorials for non-negative integers), does not fully meet the user's requirements.<br></h2></h3>
+<br></h2></h3>
+The counterfactual scenarios provided suggest potential avenues for improvement, such as adjusting output length and applying attention regularization. However, these measures would likely address symptoms rather than the root cause of the issue. A more targeted approach to enhancing the model's understanding of problem constraints and its ability to handle edge cases would be necessary to prevent similar failures in the future.<br></h2></h3>
+<br></h2></h3>
+##<h1>Causal Factors<br></h2></h3>
+<br></h2></h3>
+No significant causal factors identified.<br></h2></h3>
+<br></h2></h3>
+##<h1>Counterfactual Analysis<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Scenario 1: output_length_control**<br></h2></h3>
+- **Description:** Adjust output length to match reference (189 characters)<br></h2></h3>
+- **Expected Impact:** 0.500<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Scenario 2: attention_regulation**<br></h2></h3>
+- **Description:** Apply attention regularization to improve focus distribution<br></h2></h3>
+- **Expected Impact:** 0.800<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Scenario 3: attention_regulation**<br></h2></h3>
+- **Description:** Apply attention regularization to improve focus distribution<br></h2></h3>
+- **Expected Impact:** 0.800<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>4. Actionable Recommendations<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+##<h1>Prompt Engineering<br></h2></h3>
+<br></h2></h3>
+**1. Counterfactual Intervention: attention_regulation**<br></h2></h3>
+- **Description:** Apply attention regularization to improve focus distribution<br></h2></h3>
+- **Expected Impact:** 0.80<br></h2></h3>
+- **Implementation Effort:** 0.40<br></h2></h3>
+- **Confidence:** 0.00<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Analyze counterfactual scenario<br></h2></h3>
+- Implement proposed intervention<br></h2></h3>
+- Validate effectiveness<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**2. LLM-Generated Prompt Engineering**<br></h2></h3>
+- **Description:** Specify Edge Cases Explicitly<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+- **Implementation Effort:** 0.50<br></h2></h3>
+- **Confidence:** 0.42<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Specify Edge Cases Explicitly<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+##<h1>Data Augmentation<br></h2></h3>
+<br></h2></h3>
+**1. LLM-Generated Data Augmentation**<br></h2></h3>
+- **Description:** Include Negative Numbers in Training Data<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+- **Implementation Effort:** 0.50<br></h2></h3>
+- **Confidence:** 0.42<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Include Negative Numbers in Training Data<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+##<h1>Model Configuration<br></h2></h3>
+<br></h2></h3>
+**1. LLM-Generated Model Configuration**<br></h2></h3>
+- **Description:** Regularization Techniques<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+- **Implementation Effort:** 0.50<br></h2></h3>
+- **Confidence:** 0.42<br></h2></h3>
+<br></h2></h3>
+*Implementation Steps:*<br></h2></h3>
+- Regularization Techniques<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>5. Technical Analysis<br></h2></h3>
+<br></h2></h3>
+##<h1>Classification Details<br></h2></h3>
+- **Primary Category:** Logical Error<br></h2></h3>
+- **Sub-categories:** low_severity, simple_failure, llm_validated_Logical Error<br></h2></h3>
+- **Semantic Features:** Vector length: 11, Max value: 0.181<br></h2></h3>
+- **Attention Patterns:** Attention variance: 0.002, Max attention: 0.209<br></h2></h3>
+<br></h2></h3>
+##<h1>Confidence Metrics<br></h2></h3>
+- **Classification Confidence:** 0.600<br></h2></h3>
+- **Root Cause Confidence:** 0.000<br></h2></h3>
+- **Overall Confidence:** 0.315<br></h2></h3>
+<br></h2></h3>
+##<h1>Performance Metrics<br></h2></h3>
+- **Processing Time:** 0.00 seconds<br></h2></h3>
+- **Quality Score:** 0.000<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+#<h1>6. Implementation Roadmap<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Phase 1**<br></h2></h3>
+- **Recommendations:** 2 items<br></h2></h3>
+- **Total Effort:** 0.90<br></h2></h3>
+- **Expected Impact:** 0.70<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+**Phase 2**<br></h2></h3>
+- **Recommendations:** 2 items<br></h2></h3>
+- **Total Effort:** 1.00<br></h2></h3>
+- **Expected Impact:** 0.60<br></h2></h3>
+<br></h2></h3>
+<br></h2></h3>
+---<br></h2></h3>
+<br></h2></h3>
+*Report generated by LLM Explainability Framework v1.0.0*<br></h2></h3>
+
+    </div>
+</body>
+</html>
+        
