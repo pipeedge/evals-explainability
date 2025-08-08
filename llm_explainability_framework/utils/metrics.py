@@ -31,17 +31,40 @@ class SemanticSimilarity:
     def compute_similarity(self, text1: str, text2: str, 
                           metric: str = "cosine") -> float:
         """Compute semantic similarity between two texts"""
-        emb1 = self.embedding_model.encode([text1])
-        emb2 = self.embedding_model.encode([text2])
-        
-        if metric == "cosine":
-            return cosine_similarity(emb1, emb2)[0, 0]
-        elif metric == "euclidean":
-            return 1.0 / (1.0 + np.linalg.norm(emb1 - emb2))
-        elif metric == "manhattan":
-            return 1.0 / (1.0 + np.sum(np.abs(emb1 - emb2)))
-        else:
-            raise ValueError(f"Unknown metric: {metric}")
+        try:
+            # Handle empty or invalid text
+            if not text1 or not text1.strip():
+                text1 = "empty"
+            if not text2 or not text2.strip():
+                text2 = "empty"
+            
+            emb1 = self.embedding_model.encode([text1])
+            emb2 = self.embedding_model.encode([text2])
+            
+            # Check for NaN embeddings
+            if np.isnan(emb1).any() or np.isnan(emb2).any():
+                return 0.0
+            
+            if metric == "cosine":
+                similarity = cosine_similarity(emb1, emb2)[0, 0]
+            elif metric == "euclidean":
+                norm_diff = np.linalg.norm(emb1 - emb2)
+                similarity = 1.0 / (1.0 + norm_diff) if not np.isnan(norm_diff) else 0.0
+            elif metric == "manhattan":
+                abs_diff = np.sum(np.abs(emb1 - emb2))
+                similarity = 1.0 / (1.0 + abs_diff) if not np.isnan(abs_diff) else 0.0
+            else:
+                raise ValueError(f"Unknown metric: {metric}")
+            
+            # Handle NaN/inf results
+            if np.isnan(similarity) or np.isinf(similarity):
+                return 0.0
+            
+            return float(similarity)
+            
+        except Exception as e:
+            print(f"Warning: Error computing similarity between '{text1[:50]}...' and '{text2[:50]}...': {e}")
+            return 0.0
     
     def batch_similarity(self, texts1: List[str], texts2: List[str],
                         metric: str = "cosine") -> np.ndarray:
@@ -81,23 +104,61 @@ class AttentionAnalyzer:
         This is a simplified implementation that can be enhanced with actual
         transformer attention weights when available.
         """
-        # Tokenize texts (simplified)
+        # Handle empty text cases
+        if not input_text or not input_text.strip():
+            input_text = "empty_input"
+        if not output_text or not output_text.strip():
+            output_text = "empty_output"
+        
+        # Tokenize texts (simplified) with minimum length check
         input_tokens = input_text.split()
         output_tokens = output_text.split()
+        
+        # Ensure minimum token count to avoid empty matrices
+        if len(input_tokens) == 0:
+            input_tokens = ["empty"]
+        if len(output_tokens) == 0:
+            output_tokens = ["empty"]
         
         # Create attention matrix based on token similarity
         attention_matrix = np.zeros((len(input_tokens), len(output_tokens)))
         
         semantic_sim = SemanticSimilarity()
         
-        for i, input_token in enumerate(input_tokens):
-            for j, output_token in enumerate(output_tokens):
-                # Compute semantic similarity between tokens
-                similarity = semantic_sim.compute_similarity(input_token, output_token)
-                attention_matrix[i, j] = similarity
-        
-        # Normalize attention weights
-        attention_weights = F.softmax(torch.tensor(attention_matrix), dim=1).numpy()
+        try:
+            for i, input_token in enumerate(input_tokens):
+                for j, output_token in enumerate(output_tokens):
+                    # Compute semantic similarity between tokens
+                    similarity = semantic_sim.compute_similarity(input_token, output_token)
+                    
+                    # Handle NaN/inf similarity values
+                    if np.isnan(similarity) or np.isinf(similarity):
+                        similarity = 0.0
+                    
+                    attention_matrix[i, j] = similarity
+            
+            # Check for all-zero matrix and add small epsilon to diagonal
+            if np.all(attention_matrix == 0):
+                np.fill_diagonal(attention_matrix, 1e-8)
+            
+            # Ensure matrix has valid values
+            attention_matrix = np.nan_to_num(attention_matrix, nan=0.0, posinf=1.0, neginf=0.0)
+            
+            # Add small epsilon to prevent numerical instability in softmax
+            attention_matrix = attention_matrix + 1e-10
+            
+            # Normalize attention weights with numerical stability
+            attention_tensor = torch.tensor(attention_matrix, dtype=torch.float32)
+            attention_weights = F.softmax(attention_tensor, dim=1).numpy()
+            
+            # Final check for NaN values
+            attention_weights = np.nan_to_num(attention_weights, nan=1.0/attention_weights.shape[1])
+            
+        except Exception as e:
+            print(f"Warning: Error computing attention weights: {e}")
+            # Fallback: uniform attention distribution
+            attention_weights = np.ones((len(input_tokens), len(output_tokens)))
+            attention_weights = attention_weights / attention_weights.sum(axis=1, keepdims=True)
         
         return attention_weights
     
@@ -105,18 +166,54 @@ class AttentionAnalyzer:
         """Analyze attention patterns for interpretability"""
         patterns = {}
         
-        # Compute attention concentration
-        patterns['concentration'] = np.max(attention_weights) - np.mean(attention_weights)
-        
-        # Compute attention dispersion
-        patterns['dispersion'] = entropy(attention_weights.flatten())
-        
-        # Compute attention variance
-        patterns['variance'] = np.var(attention_weights)
-        
-        # Compute attention sparsity
-        threshold = 0.1
-        patterns['sparsity'] = np.mean(attention_weights < threshold)
+        try:
+            # Handle NaN values in attention weights
+            if attention_weights.size == 0:
+                attention_weights = np.array([[1.0]])
+            
+            # Clean attention weights
+            clean_weights = np.nan_to_num(attention_weights, nan=0.0, posinf=1.0, neginf=0.0)
+            
+            # Ensure weights are normalized
+            if clean_weights.sum() == 0:
+                clean_weights = np.ones_like(clean_weights) / clean_weights.size
+            
+            # Compute attention concentration
+            max_val = np.max(clean_weights)
+            mean_val = np.mean(clean_weights)
+            patterns['concentration'] = max_val - mean_val if not np.isnan(max_val - mean_val) else 0.0
+            
+            # Compute attention dispersion
+            flat_weights = clean_weights.flatten()
+            flat_weights = flat_weights[flat_weights > 0]  # Remove zeros for entropy
+            if len(flat_weights) > 0:
+                patterns['dispersion'] = entropy(flat_weights)
+            else:
+                patterns['dispersion'] = 0.0
+            
+            # Handle NaN in dispersion
+            if np.isnan(patterns['dispersion']):
+                patterns['dispersion'] = 0.0
+            
+            # Compute attention variance
+            patterns['variance'] = np.var(clean_weights)
+            if np.isnan(patterns['variance']):
+                patterns['variance'] = 0.0
+            
+            # Compute attention sparsity
+            threshold = 0.1
+            patterns['sparsity'] = np.mean(clean_weights < threshold)
+            if np.isnan(patterns['sparsity']):
+                patterns['sparsity'] = 0.0
+                
+        except Exception as e:
+            print(f"Warning: Error analyzing attention patterns: {e}")
+            patterns = {
+                'concentration': 0.0,
+                'dispersion': 0.0,
+                'variance': 0.0,
+                'sparsity': 0.0
+            }
         
         return patterns
 

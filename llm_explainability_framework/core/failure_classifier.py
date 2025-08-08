@@ -103,12 +103,23 @@ class SemanticAttentionClassifier:
         input_embeddings = self.embedding_model.encode([input_text])[0]
         output_embeddings = self.embedding_model.encode([output_text])[0]
         
+        # Clean attention weights and handle NaN values
+        clean_attention_weights = np.nan_to_num(attention_weights, nan=0.0, posinf=1.0, neginf=0.0)
+        
+        # Compute mean with fallback
+        attention_mean = np.mean(clean_attention_weights)
+        if np.isnan(attention_mean) or np.isinf(attention_mean):
+            attention_mean = 0.0
+        
         # Create attention-weighted feature vector
         weighted_features = np.concatenate([
-            input_embeddings * attention_weights.mean(),
+            input_embeddings * attention_mean,
             output_embeddings,
-            attention_weights.flatten()[:50]  # Top 50 attention weights
+            clean_attention_weights.flatten()[:50]  # Top 50 attention weights
         ])
+        
+        # Ensure no NaN values in final features
+        weighted_features = np.nan_to_num(weighted_features, nan=0.0, posinf=1.0, neginf=0.0)
         
         return weighted_features
     
