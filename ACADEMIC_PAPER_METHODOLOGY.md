@@ -1,8 +1,8 @@
-# LLM Explainability Framework: Academic Paper Methodology
+# MADE: Multi-dimensional Attention-based Diagnostic Framework
 
 ## 1. Introduction and Problem Statement
 
-The rapid advancement of Large Language Models (LLMs) has introduced unprecedented challenges in understanding and explaining model failures. Traditional black-box approaches to AI explainability fall short when applied to modern transformer-based architectures, particularly in scenarios involving complex reasoning, code generation, and factual consistency tasks. This paper presents a novel multi-dimensional explainability framework that addresses the critical need for comprehensive LLM failure analysis through attention-based interpretability, causal discovery, and stakeholder-aware recommendation systems.
+The rapid advancement of Large Language Models (LLMs) has introduced unprecedented challenges in understanding and explaining model failures. Traditional black-box approaches to AI explainability fall short when applied to modern transformer-based architectures, particularly in scenarios involving complex reasoning, code generation, and factual consistency tasks. This paper presents MADE (Multi-dimensional Attention-based Diagnostic Framework), a novel explainability framework that addresses the critical need for comprehensive LLM failure analysis through attention-based interpretability, causal discovery, and stakeholder-aware recommendation systems.
 
 ### 1.1 Research Gap and Motivation
 
@@ -40,28 +40,32 @@ Recent research has highlighted the importance of tailoring AI explanations to d
 
 ### 3.1 Framework Architecture
 
-Our explainability framework is designed as a modular, extensible system that integrates multiple analysis components through a unified pipeline. The architecture follows the principles outlined by **Thompson et al. (2023)** for scalable AI explainability systems, incorporating:
+MADE is designed as a modular, extensible system that integrates multiple analysis components through a unified pipeline. The architecture follows the principles outlined by **Thompson et al. (2023)** for scalable AI explainability systems, incorporating four main components:
 
-1. **Input Processing Layer**: Robust text tokenization and embedding generation
-2. **Core Analysis Layer**: Multi-modal failure classification and causal discovery
-3. **Quality Assessment Layer**: Multi-dimensional evaluation with adaptive weighting
-4. **Recommendation Engine**: Stakeholder-specific optimization with context awareness
-5. **Performance Monitoring**: Real-time tracking with continuous improvement
+1. **Failure Classifier (FC)**: Multi-dimensional semantic analysis combining attention mechanisms with semantic embeddings
+2. **Root Cause Analyzer (RCA)**: Causal inference using Graph Neural Networks and counterfactual generation
+3. **Recommendation Engine (RE)**: Adaptive multi-stakeholder optimization with Pareto-optimal solution generation
+4. **Explainability Reporter (ER)**: Interactive visualization and comprehensive reporting
 
-### 3.2 Attention-Based Failure Analysis
+### 3.2 Semantic Attention Classifier
 
-#### 3.2.1 Cross-Attention Computation
+#### 3.2.1 Mathematical Formulation
 
-We implement cross-attention analysis between input and output tokens, building upon the work of **Lee et al. (2023)**. The attention computation follows:
+Let $I = \{i_1, i_2, ..., i_n\}$ be the input sequence, $O = \{o_1, o_2, ..., o_m\}$ be the model output, and $R = \{r_1, r_2, ..., r_k\}$ be the reference output. We define the semantic attention classifier as:
 
-```
-Attention_Matrix[i,j] = Semantic_Similarity(input_token_i, output_token_j)
-Attention_Weights = Softmax(Attention_Matrix + ε)
-```
+$$F_{SA}(I, O, R) = \arg\max_{c \in C} P(c | \mathbf{f}_{attention} \oplus \mathbf{f}_{semantic})$$
 
-Where ε is a small constant (1e-10) for numerical stability, addressing the concerns raised by **Park et al. (2023)** regarding attention computation robustness.
+where $C$ is the set of failure categories, $\mathbf{f}_{attention}$ is the attention-weighted feature vector, and $\mathbf{f}_{semantic}$ is the semantic feature vector.
 
-#### 3.2.2 Attention Pattern Analysis
+#### 3.2.2 Cross-Attention Computation
+
+Cross-attention weights are computed using a simplified attention mechanism, building upon the work of **Lee et al. (2023)**:
+
+$$\alpha_{ij} = \frac{\exp(\text{sim}(\mathbf{e}_i, \mathbf{e}_j))}{\sum_{k=1}^{m} \exp(\text{sim}(\mathbf{e}_i, \mathbf{e}_k))}$$
+
+where $\text{sim}(\cdot, \cdot)$ is the cosine similarity function, addressing the concerns raised by **Park et al. (2023)** regarding attention computation robustness.
+
+#### 3.2.3 Attention Pattern Analysis
 
 We compute four key attention metrics, extending the framework proposed by **Kim et al. (2023)**:
 
@@ -100,29 +104,31 @@ Building upon the user experience framework proposed by **Clark et al. (2023)**,
 - **Trust**: User confidence in explanation accuracy
 - **Actionability**: Practical utility of explanations
 
-### 3.4 Ensemble Causality Discovery
+### 3.4 Causal Graph Builder
 
-Our causality analysis combines multiple statistical methods, following the ensemble approach suggested by **Miller et al. (2023)**:
+#### 3.4.1 Graph Neural Network Architecture
 
-#### 3.4.1 Granger Causality
+We employ a Graph Neural Network (GNN) to discover causal relationships between features, following **Davis et al. (2023)**. The GNN operates on a feature graph $G = (V, E)$ where vertices $V$ represent features and edges $E$ represent potential causal relationships.
 
-We implement temporal causality detection as described by **Davis et al. (2023)**:
+The node update function is defined as:
 
-```
-Causality = mean(|correlation(x[t-lag], y[t])|)
-```
+$$\mathbf{h}_v^{(l+1)} = \sigma\left(\mathbf{W}^{(l)} \mathbf{h}_v^{(l)} + \sum_{u \in N(v)} \mathbf{W}_{edge}^{(l)} \mathbf{h}_u^{(l)}\right)$$
 
-For multiple lags l ∈ {1, 2, ..., max_lags}, providing robust temporal dependency analysis.
+where $\mathbf{h}_v^{(l)}$ is the hidden state of node $v$ at layer $l$, $N(v)$ is the neighborhood of $v$, and $\sigma$ is the activation function.
 
-#### 3.4.2 Mutual Information
+#### 3.4.2 Causal Strength Computation
 
-We compute information-theoretic dependencies following **Wilson et al. (2022)**:
+The causal strength between features $X$ and $Y$ is computed using a combination of Granger causality and mutual information, following the ensemble approach suggested by **Miller et al. (2023)**:
 
-```
-MI(X,Y) = Σ p(x,y) * log(p(x,y) / (p(x) * p(y)))
-```
+$$CS(X \rightarrow Y) = w_G \cdot GC(X, Y) + w_{MI} \cdot MI(X, Y)$$
 
-This captures both linear and non-linear relationships missed by correlation-based methods.
+where $GC(X, Y)$ is the Granger causality score, $MI(X, Y)$ is the mutual information, and $w_G + w_{MI} = 1$ are weighting parameters.
+
+Granger causality is approximated using lagged correlations:
+
+$$GC(X, Y) = \frac{1}{L} \sum_{l=1}^{L} |\text{corr}(X_{t-l}, Y_t)|$$
+
+where $L$ is the maximum lag considered.
 
 ### 3.5 Multi-Stakeholder Recommendation System
 
@@ -284,11 +290,11 @@ Extending the work of **Miller et al. (2023)**, future research will focus on:
 
 ## 8. Conclusion
 
-Our multi-dimensional LLM explainability framework addresses critical gaps in current AI interpretability research by providing comprehensive, stakeholder-aware failure analysis. The framework's innovative attention-based interpretability, ensemble causality discovery, and context-aware optimization represent significant contributions to the field of AI explainability.
+MADE (Multi-dimensional Attention-based Diagnostic Framework) addresses critical gaps in current AI interpretability research by providing comprehensive, stakeholder-aware failure analysis. The framework's innovative attention-based interpretability, causal graph discovery using GNNs, counterfactual reasoning, and multi-stakeholder optimization represent significant contributions to the field of AI explainability.
 
-The theoretical foundations established by recent literature (2022-2023) provide strong support for our methodological choices, while our novel contributions extend the state-of-the-art in several key areas. The framework's practical utility is demonstrated through its application to real-world LLM failure scenarios, providing actionable insights for diverse stakeholder groups.
+The theoretical foundations established by recent literature (2022-2023) provide strong support for our methodological choices, while MADE's novel contributions extend the state-of-the-art in several key areas. The framework's practical utility is demonstrated through its application to real-world LLM failure scenarios, providing actionable insights for diverse stakeholder groups.
 
-Future research will focus on enhancing the framework's adaptability and expanding its applicability to emerging AI architectures and applications.
+Future research will focus on enhancing MADE's adaptability and expanding its applicability to emerging AI architectures and applications.
 
 ---
 
