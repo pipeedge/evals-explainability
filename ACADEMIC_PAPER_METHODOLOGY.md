@@ -49,6 +49,32 @@ MADE (Multi-dimensional Attention-based Diagnostic Framework) is designed as a m
 
 The framework processes failure instances through this pipeline, with each component building upon the outputs of the previous stage while maintaining feedback loops for continuous improvement.
 
+#### 3.1.1 Workflow Diagram
+
+```mermaid
+flowchart LR
+  A[Benchmark / Real-world Failure Instances\n(HumanEval, TruthfulQA, Logs)] --> P[Preprocessing & Embedding]
+  P --> FC[Failure Classifier (FC)\nAttention + Semantic Features + Pattern Distance]
+  FC --> RCA[Root Cause Analyzer (RCA)\nCausal Graph + Causality Scores + Counterfactuals]
+  RCA --> RE[Recommendation Engine (RE)\nPareto Multi-objective + Context Adaptation + Bandit]
+  RE --> ER[Explainability Reporter (ER)\nQuality, Truthfulness, CoT Faithfulness, Visuals]
+  ER --> OUT[Comprehensive Report & Artifacts\n(JSON/MD/HTML, Visual Dashboards)]
+
+  %% Feedback loops
+  ER -- "Quality feedback / calibration" --> FC
+  ER -- "Stakeholder feedback" --> RE
+  RCA -- "Causal insights" --> ER
+
+  %% Persistent knowledge stores
+  PL[(Pattern Library)] --- FC
+  CG[(Causal Graph Store)] --- RCA
+  POL[(Policy / Preference Store)] --- RE
+
+  %% Outputs
+  OUT -->|Attention heatmaps, causal graphs, rec dashboards| VIZ[Interactive Visualizations]
+  OUT -->|Stakeholder-specific views| VIEW[Stakeholder Reports]
+```
+
 ### 3.2 Component 1: Failure Classifier (FC)
 
 The Failure Classifier represents the first and foundational component of MADE, responsible for multi-dimensional failure categorization using semantic attention mechanisms.
