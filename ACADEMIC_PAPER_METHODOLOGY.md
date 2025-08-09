@@ -57,9 +57,9 @@ The Failure Classifier represents the first and foundational component of MADE, 
 
 Let $I = \{i_1, i_2, ..., i_n\}$ be the input sequence, $O = \{o_1, o_2, ..., o_m\}$ be the model output, and $R = \{r_1, r_2, ..., r_k\}$ be the reference output. We define the semantic attention classifier as:
 
-$$F_{SA}(I, O, R) = \arg\max_{c \in C} P(c | \mathbf{f}_{attention} \oplus \mathbf{f}_{semantic})$$
+$$F_{SA}(I, O, R) = \arg\max_{c \in C} P(c | \mathbf{f}_{attention}, \mathbf{f}_{semantic}, \mathbf{d})$$
 
-where $C$ is the set of failure categories, $\mathbf{f}_{attention}$ is the attention-weighted feature vector, and $\mathbf{f}_{semantic}$ is the semantic feature vector.
+where $C$ is the set of failure categories, $\mathbf{f}_{attention}$ is the attention-weighted feature vector, $\mathbf{f}_{semantic}$ is the semantic feature vector, and $\mathbf{d}$ is the vector of semantic distances to known failure patterns.
 
 #### 3.2.2 Cross-Attention Computation
 
@@ -87,11 +87,19 @@ where:
 
 #### 3.2.3 Semantic Distance Computation
 
+The semantic distance computation is used for **failure pattern matching** in the classification process. We maintain a library of known failure patterns $P = \{p_1, p_2, ..., p_k\}$ representing different failure types (e.g., syntax errors, logical errors, incomplete outputs, factual inconsistencies).
+
 For each failure pattern $p \in P$, we compute semantic distances using:
 
 $$d_p(I, O, R) = \cos(\mathbf{f}_{semantic}, \mathbf{e}_p)$$
 
-where $\mathbf{f}_{semantic}$ is the semantic feature vector defined above, and $\mathbf{e}_p$ is the embedding representation of failure pattern $p$.
+where $\mathbf{f}_{semantic}$ is the semantic feature vector of the current instance, and $\mathbf{e}_p$ is the embedding representation of failure pattern $p$.
+
+**Usage in Classification:** The semantic distances are used as features in the final classification decision:
+
+$$P(c | \mathbf{f}_{attention}, \mathbf{f}_{semantic}) \propto \exp\left(\mathbf{W}_c^T \left[\mathbf{f}_{attention} \oplus \mathbf{f}_{semantic} \oplus \mathbf{d}\right] + b_c\right)$$
+
+where $\mathbf{d} = [d_{p_1}, d_{p_2}, ..., d_{p_k}]^T$ is the vector of semantic distances to all known failure patterns, $\mathbf{W}_c$ and $b_c$ are learned parameters for class $c$.
 
 #### 3.2.4 Attention Pattern Analysis
 
