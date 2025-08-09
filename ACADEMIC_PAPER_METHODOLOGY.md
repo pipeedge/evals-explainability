@@ -67,21 +67,31 @@ Cross-attention weights are computed using a simplified attention mechanism, bui
 
 $$\alpha_{ij} = \frac{\exp(\text{sim}(\mathbf{e}_i, \mathbf{e}_j))}{\sum_{k=1}^{m} \exp(\text{sim}(\mathbf{e}_i, \mathbf{e}_k))}$$
 
-where $\text{sim}(\cdot, \cdot)$ is the cosine similarity function, addressing the concerns raised by **Park et al. (2023)** regarding attention computation robustness.
+where $\text{sim}(\cdot, \cdot)$ is the cosine similarity function, $\mathbf{e}_i$ are input token embeddings, $\mathbf{e}_j$ are output token embeddings, and the normalization is over all $m$ output tokens, addressing the concerns raised by **Park et al. (2023)** regarding attention computation robustness.
 
 The attention-weighted features are computed as:
 
-$$\mathbf{f}_{attention} = \sum_{i=1}^{n} \alpha_i \cdot \mathbf{e}_i$$
+$$\mathbf{f}_{attention} = \sum_{i=1}^{n} \bar{\alpha}_i \cdot \mathbf{e}_i$$
 
-where $\alpha_i$ are the cross-attention weights and $\mathbf{e}_i$ are the semantic embeddings of input tokens.
+where $\bar{\alpha}_i = \frac{1}{m}\sum_{j=1}^{m} \alpha_{ij}$ is the average attention weight for input token $i$ across all output tokens, and $\mathbf{e}_i$ are the semantic embeddings of input tokens.
+
+The semantic features are computed as the concatenated representation of input, output, and reference embeddings:
+
+$$\mathbf{f}_{semantic} = \mathbf{e}_I \oplus \mathbf{e}_O \oplus \mathbf{e}_R$$
+
+where:
+- $\mathbf{e}_I = \frac{1}{n}\sum_{i=1}^{n} \mathbf{e}_i$ is the mean-pooled input embedding
+- $\mathbf{e}_O = \frac{1}{m}\sum_{j=1}^{m} \mathbf{e}_j$ is the mean-pooled output embedding  
+- $\mathbf{e}_R = \frac{1}{k}\sum_{r=1}^{k} \mathbf{e}_r$ is the mean-pooled reference embedding
+- $\oplus$ denotes vector concatenation
 
 #### 3.2.3 Semantic Distance Computation
 
 For each failure pattern $p \in P$, we compute semantic distances using:
 
-$$d_p(I, O, R) = \cos(\mathbf{e}_{combined}, \mathbf{e}_p)$$
+$$d_p(I, O, R) = \cos(\mathbf{f}_{semantic}, \mathbf{e}_p)$$
 
-where $\mathbf{e}_{combined} = \mathbf{e}_I \oplus \mathbf{e}_O \oplus \mathbf{e}_R$ is the concatenated representation of input, output, and reference embeddings.
+where $\mathbf{f}_{semantic}$ is the semantic feature vector defined above, and $\mathbf{e}_p$ is the embedding representation of failure pattern $p$.
 
 #### 3.2.4 Attention Pattern Analysis
 
