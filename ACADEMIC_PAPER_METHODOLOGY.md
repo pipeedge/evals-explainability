@@ -52,27 +52,32 @@ The framework processes failure instances through this pipeline, with each compo
 #### 3.1.1 Workflow Diagram
 
 ```mermaid
-flowchart LR
-  A["Benchmark / Real-world Failure Instances<br/>(HumanEval, TruthfulQA, Logs)"] --> P["Preprocessing and Embedding"]
-  P --> FC["Failure Classifier (FC)<br/>Attention + Semantic Features + Pattern Distance"]
-  FC --> RCA["Root Cause Analyzer (RCA)<br/>Causal Graph + Causality Scores + Counterfactuals"]
-  RCA --> RE["Recommendation Engine (RE)<br/>Pareto Multi-objective + Context Adaptation + Bandit"]
-  RE --> ER["Explainability Reporter (ER)<br/>Quality, Truthfulness, CoT Faithfulness, Visuals"]
-  ER --> OUT["Comprehensive Report and Artifacts<br/>(JSON/MD/HTML, Visual Dashboards)"]
+flowchart TD
+  %% Compact, vertical layout for A4
+  A["Failures<br/>(HumanEval / TruthfulQA / Logs)"] --> P["Preprocess<br/>Embed"]
+  P --> FC["FC<br/>Attention + Semantics + Patterns"]
+  FC --> RCA["RCA<br/>Causal Graph + Counterfactuals"]
+  RCA --> RE["RE<br/>Pareto + Context + Bandit"]
+  RE --> ER["ER<br/>Quality + Truthfulness + CoT"]
+  ER --> OUT["Reports<br/>(JSON / MD / HTML)"]
+  OUT --> VIEW["Stakeholder Reports"]
+  OUT --> VIZ["Interactive Visuals"]
 
-  %% Feedback loops
-  ER -- "Quality feedback / calibration" --> FC
-  ER -- "Stakeholder feedback" --> RE
-  RCA -- "Causal insights" --> ER
+  %% Minimal feedback to reduce width
+  ER -- "Calibrate" --> FC
+  ER -- "Feedback" --> RE
 
-  %% Persistent knowledge stores
-  PL["Pattern Library"] --- FC
-  CG["Causal Graph Store"] --- RCA
-  POL["Policy / Preference Store"] --- RE
+  %% Stores stacked to the side to minimize width
+  subgraph STORES["Persistent Stores"]
+    direction TB
+    PL["Pattern Library"]
+    CG["Causal Graph Store"]
+    POL["Policy / Preference Store"]
+  end
 
-  %% Outputs
-  OUT -->|Attention heatmaps, causal graphs, rec dashboards| VIZ["Interactive Visualizations"]
-  OUT -->|Stakeholder-specific views| VIEW["Stakeholder Reports"]
+  PL --- FC
+  CG --- RCA
+  POL --- RE
 ```
 
 ### 3.2 Component 1: Failure Classifier (FC)
