@@ -53,12 +53,12 @@ The framework processes failure instances through this pipeline, with each compo
 
 ```mermaid
 flowchart LR
-  A[Benchmark / Real-world Failure Instances\n(HumanEval, TruthfulQA, Logs)] --> P[Preprocessing & Embedding]
-  P --> FC[Failure Classifier (FC)\nAttention + Semantic Features + Pattern Distance]
-  FC --> RCA[Root Cause Analyzer (RCA)\nCausal Graph + Causality Scores + Counterfactuals]
-  RCA --> RE[Recommendation Engine (RE)\nPareto Multi-objective + Context Adaptation + Bandit]
-  RE --> ER[Explainability Reporter (ER)\nQuality, Truthfulness, CoT Faithfulness, Visuals]
-  ER --> OUT[Comprehensive Report & Artifacts\n(JSON/MD/HTML, Visual Dashboards)]
+  A["Benchmark / Real-world Failure Instances<br/>(HumanEval, TruthfulQA, Logs)"] --> P["Preprocessing and Embedding"]
+  P --> FC["Failure Classifier (FC)<br/>Attention + Semantic Features + Pattern Distance"]
+  FC --> RCA["Root Cause Analyzer (RCA)<br/>Causal Graph + Causality Scores + Counterfactuals"]
+  RCA --> RE["Recommendation Engine (RE)<br/>Pareto Multi-objective + Context Adaptation + Bandit"]
+  RE --> ER["Explainability Reporter (ER)<br/>Quality, Truthfulness, CoT Faithfulness, Visuals"]
+  ER --> OUT["Comprehensive Report and Artifacts<br/>(JSON/MD/HTML, Visual Dashboards)"]
 
   %% Feedback loops
   ER -- "Quality feedback / calibration" --> FC
@@ -66,13 +66,13 @@ flowchart LR
   RCA -- "Causal insights" --> ER
 
   %% Persistent knowledge stores
-  PL[(Pattern Library)] --- FC
-  CG[(Causal Graph Store)] --- RCA
-  POL[(Policy / Preference Store)] --- RE
+  PL["Pattern Library"] --- FC
+  CG["Causal Graph Store"] --- RCA
+  POL["Policy / Preference Store"] --- RE
 
   %% Outputs
-  OUT -->|Attention heatmaps, causal graphs, rec dashboards| VIZ[Interactive Visualizations]
-  OUT -->|Stakeholder-specific views| VIEW[Stakeholder Reports]
+  OUT -->|Attention heatmaps, causal graphs, rec dashboards| VIZ["Interactive Visualizations"]
+  OUT -->|Stakeholder-specific views| VIEW["Stakeholder Reports"]
 ```
 
 ### 3.2 Component 1: Failure Classifier (FC)
