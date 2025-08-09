@@ -60,8 +60,6 @@ flowchart TD
   RCA --> RE["RE<br/>Pareto + Context + Bandit"]
   RE --> ER["ER<br/>Quality + Truthfulness + CoT"]
   ER --> OUT["Reports<br/>(JSON / MD / HTML)"]
-  OUT --> VIEW["Stakeholder Reports"]
-  OUT --> VIZ["Interactive Visuals"]
 
   %% Minimal feedback to reduce width
   ER -- "Calibrate" --> FC
