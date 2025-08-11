@@ -1,0 +1,24 @@
+flowchart TD
+  %% Compact, vertical layout for A4
+  A["Failures<br/>(HumanEval / TruthfulQA / Logs)"] --> P["Preprocess<br/>Embed"]
+  P --> FC["FC<br/>Attention + Semantics + Patterns"]
+  FC --> RCA["RCA<br/>Causal Graph + Counterfactuals"]
+  RCA --> RE["RE<br/>Pareto + Context + Bandit"]
+  RE --> ER["ER<br/>Quality + Truthfulness + CoT"]
+  ER --> OUT["Reports<br/>(JSON / MD / HTML)"]
+
+  %% Minimal feedback to reduce width
+  ER -- "Calibrate" --> FC
+  ER -- "Feedback" --> RE
+
+  %% Stores stacked to the side to minimize width
+  subgraph STORES["Stores"]
+    direction TB
+    PL["Pattern Library"]
+    CG["Causal Graph Store"]
+    POL["Policy / Preference Store"]
+  end
+
+  PL --- FC
+  CG --- RCA
+  POL --- RE 
