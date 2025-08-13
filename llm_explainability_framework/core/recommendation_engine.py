@@ -524,33 +524,302 @@ class ContextualRecommendationGenerator:
     def _generate_custom_recommendations(self, instance: FailureInstance,
                                        classification: FailureClassification,
                                        root_cause: RootCauseAnalysis) -> List[Recommendation]:
-        """Generate custom recommendations based on specific analysis results"""
+        """Generate comprehensive custom recommendations based on specific analysis results"""
         custom_recs = []
         
-        # Generate recommendations based on counterfactual scenarios
+        # Generate causal factor-based recommendations
+        for factor in root_cause.causal_factors[:3]:  # Top 3 causal factors
+            custom_recs.extend(self._generate_factor_recommendations(factor, instance, classification, root_cause))
+        
+        # Generate counterfactual-based recommendations
         for cf in root_cause.counterfactual_scenarios[:2]:  # Top 2 counterfactuals
             if cf.get('expected_impact', 0) > 0.5:
-                custom_rec = Recommendation(
-                    recommendation_id=f"{instance.input_id}_custom_{cf.get('intervention_type', 'unknown')}",
-                    recommendation_type=RecommendationType.PROMPT_ENGINEERING,
-                    stakeholder_type=StakeholderType.DEVELOPER,
-                    title=f"Counterfactual Intervention: {cf.get('intervention_type', 'Unknown')}",
-                    description=cf.get('description', 'No description available'),
-                    implementation_steps=[
-                        "Analyze counterfactual scenario",
-                        "Implement proposed intervention",
-                        "Validate effectiveness"
-                    ],
-                    expected_impact=cf.get('expected_impact', 0.5),
-                    implementation_effort=0.4,
-                    confidence=root_cause.confidence_score,
-                    priority_score=0.0,
-                    evidence=[f"Derived from counterfactual analysis"],
-                    constraints=["Requires careful validation"]
-                )
-                custom_recs.append(custom_rec)
+                custom_rec = self._create_counterfactual_recommendation(cf, instance, root_cause)
+                if custom_rec:
+                    custom_recs.append(custom_rec)
+        
+        # Generate task-specific recommendations
+        task_specific_recs = self._generate_task_specific_recommendations(instance, classification, root_cause)
+        custom_recs.extend(task_specific_recs)
+        
+        # Generate immediate action recommendations
+        immediate_recs = self._generate_immediate_actions(instance, classification, root_cause)
+        custom_recs.extend(immediate_recs)
         
         return custom_recs
+    
+    def _generate_factor_recommendations(self, factor: CausalFactor, instance: FailureInstance,
+                                       classification: FailureClassification, 
+                                       root_cause: RootCauseAnalysis) -> List[Recommendation]:
+        """Generate recommendations based on causal factors"""
+        recommendations = []
+        
+        if factor.factor_type == "input":
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_input_{factor.factor_name}",
+                recommendation_type=RecommendationType.PROMPT_ENGINEERING,
+                stakeholder_type=StakeholderType.DEVELOPER,
+                title=f"Input Optimization: {factor.factor_name.replace('_', ' ').title()}",
+                description=f"Address input-related issues affecting {factor.factor_name}",
+                implementation_steps=[
+                    f"Analyze {factor.factor_name} patterns in failed cases",
+                    "Develop input preprocessing guidelines",
+                    "Implement input validation checks",
+                    "Create input quality metrics",
+                    "Test with improved input samples"
+                ],
+                expected_impact=factor.causal_strength * 0.8,
+                implementation_effort=0.3,
+                confidence=factor.confidence,
+                priority_score=factor.causal_strength,
+                evidence=factor.evidence,
+                constraints=[f"Requires understanding of {factor.factor_name} patterns"]
+            ))
+            
+        elif factor.factor_type == "processing":
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_processing_{factor.factor_name}",
+                recommendation_type=RecommendationType.MODEL_CONFIGURATION,
+                stakeholder_type=StakeholderType.RESEARCHER,
+                title=f"Processing Enhancement: {factor.factor_name.replace('_', ' ').title()}",
+                description=f"Improve model processing for {factor.factor_name}",
+                implementation_steps=[
+                    f"Investigate {factor.factor_name} mechanisms",
+                    "Implement targeted model adjustments",
+                    "Add specialized training data",
+                    "Develop processing metrics",
+                    "Validate improvements on test cases"
+                ],
+                expected_impact=factor.causal_strength * 0.9,
+                implementation_effort=0.6,
+                confidence=factor.confidence,
+                priority_score=factor.causal_strength * 0.9,
+                evidence=factor.evidence,
+                constraints=["Requires model architecture understanding", "May need retraining"]
+            ))
+            
+        elif factor.factor_type == "output":
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_output_{factor.factor_name}",
+                recommendation_type=RecommendationType.ARCHITECTURAL_CHANGE,
+                stakeholder_type=StakeholderType.DEVELOPER,
+                title=f"Output Control: {factor.factor_name.replace('_', ' ').title()}",
+                description=f"Implement output constraints for {factor.factor_name}",
+                implementation_steps=[
+                    f"Define {factor.factor_name} quality metrics",
+                    "Implement output validation pipeline",
+                    "Add post-processing filters",
+                    "Create output quality scoring",
+                    "Deploy controlled generation"
+                ],
+                expected_impact=factor.causal_strength * 0.7,
+                implementation_effort=0.4,
+                confidence=factor.confidence,
+                priority_score=factor.causal_strength * 0.8,
+                evidence=factor.evidence,
+                constraints=["Requires output format understanding"]
+            ))
+        
+        return recommendations
+    
+    def _create_counterfactual_recommendation(self, counterfactual: Dict[str, Any],
+                                            instance: FailureInstance,
+                                            root_cause: RootCauseAnalysis) -> Optional[Recommendation]:
+        """Create recommendation from counterfactual scenario"""
+        intervention_type = counterfactual.get('intervention_type', 'unknown')
+        
+        # Map intervention types to recommendation types
+        type_mapping = {
+            'prompt_modification': RecommendationType.PROMPT_ENGINEERING,
+            'attention_regularization': RecommendationType.MODEL_CONFIGURATION,
+            'output_length_control': RecommendationType.ARCHITECTURAL_CHANGE,
+            'input_preprocessing': RecommendationType.DATA_AUGMENTATION
+        }
+        
+        rec_type = type_mapping.get(intervention_type, RecommendationType.PROMPT_ENGINEERING)
+        
+        return Recommendation(
+            recommendation_id=f"{instance.input_id}_counterfactual_{intervention_type}",
+            recommendation_type=rec_type,
+            stakeholder_type=StakeholderType.DEVELOPER,
+            title=f"Counterfactual Solution: {intervention_type.replace('_', ' ').title()}",
+            description=counterfactual.get('description', 'Apply counterfactual intervention'),
+            implementation_steps=[
+                "Review counterfactual analysis",
+                f"Implement {intervention_type} changes",
+                "Test intervention effectiveness",
+                "Monitor for side effects",
+                "Refine based on results"
+            ],
+            expected_impact=counterfactual.get('expected_impact', 0.5),
+            implementation_effort=0.4,
+            confidence=root_cause.confidence_score,
+            priority_score=counterfactual.get('expected_impact', 0.5),
+            evidence=[f"Derived from counterfactual analysis: {intervention_type}"],
+            constraints=["Requires careful validation", "May affect other cases"]
+        )
+    
+    def _generate_task_specific_recommendations(self, instance: FailureInstance,
+                                             classification: FailureClassification,
+                                             root_cause: RootCauseAnalysis) -> List[Recommendation]:
+        """Generate recommendations specific to the task type"""
+        recommendations = []
+        
+        if instance.task_type == "NL2CODE":
+            recommendations.extend(self._generate_code_generation_recommendations(instance, classification, root_cause))
+        elif instance.task_type == "NL2NL":
+            recommendations.extend(self._generate_text_generation_recommendations(instance, classification, root_cause))
+        elif instance.task_type == "CODE2NL":
+            recommendations.extend(self._generate_code_explanation_recommendations(instance, classification, root_cause))
+        
+        return recommendations
+    
+    def _generate_code_generation_recommendations(self, instance: FailureInstance,
+                                                classification: FailureClassification,
+                                                root_cause: RootCauseAnalysis) -> List[Recommendation]:
+        """Generate code generation specific recommendations"""
+        recommendations = []
+        
+        # Syntax improvement recommendation
+        if "syntax" in classification.failure_category.lower():
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_syntax_improvement",
+                recommendation_type=RecommendationType.PROMPT_ENGINEERING,
+                stakeholder_type=StakeholderType.DEVELOPER,
+                title="Syntax-Aware Code Generation",
+                description="Enhance prompts with syntax validation requirements",
+                implementation_steps=[
+                    "Add explicit syntax checking instructions to prompts",
+                    "Include language-specific formatting guidelines",
+                    "Implement real-time syntax validation",
+                    "Add syntax error recovery mechanisms",
+                    "Test with complex syntax patterns"
+                ],
+                expected_impact=0.8,
+                implementation_effort=0.3,
+                confidence=0.9,
+                priority_score=0.8,
+                evidence=["Syntax errors detected in output"],
+                constraints=["Language-specific implementation needed"]
+            ))
+        
+        # Logic improvement recommendation
+        if "logical" in classification.failure_category.lower():
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_logic_improvement",
+                recommendation_type=RecommendationType.TRAINING_STRATEGY,
+                stakeholder_type=StakeholderType.RESEARCHER,
+                title="Logical Reasoning Enhancement",
+                description="Improve model's logical reasoning for code generation",
+                implementation_steps=[
+                    "Analyze logical error patterns",
+                    "Develop algorithm-specific training data",
+                    "Implement step-by-step reasoning prompts",
+                    "Add logical validation checks",
+                    "Create comprehensive test suites"
+                ],
+                expected_impact=0.85,
+                implementation_effort=0.7,
+                confidence=0.8,
+                priority_score=0.75,
+                evidence=["Logical errors in generated algorithms"],
+                constraints=["Requires extensive training data", "Complex implementation"]
+            ))
+        
+        return recommendations
+    
+    def _generate_text_generation_recommendations(self, instance: FailureInstance,
+                                                classification: FailureClassification,
+                                                root_cause: RootCauseAnalysis) -> List[Recommendation]:
+        """Generate text generation specific recommendations"""
+        recommendations = []
+        
+        # Factual accuracy improvement
+        if "factual" in classification.failure_category.lower() or "hallucination" in classification.failure_category.lower():
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_factual_accuracy",
+                recommendation_type=RecommendationType.DATA_AUGMENTATION,
+                stakeholder_type=StakeholderType.RESEARCHER,
+                title="Factual Accuracy Enhancement",
+                description="Implement fact-checking and verification mechanisms",
+                implementation_steps=[
+                    "Integrate external knowledge bases",
+                    "Implement real-time fact verification",
+                    "Add uncertainty quantification",
+                    "Create factual consistency scoring",
+                    "Develop hallucination detection"
+                ],
+                expected_impact=0.9,
+                implementation_effort=0.8,
+                confidence=0.8,
+                priority_score=0.85,
+                evidence=["Factual inconsistencies detected"],
+                constraints=["Requires knowledge base access", "Complex verification logic"]
+            ))
+        
+        return recommendations
+    
+    def _generate_code_explanation_recommendations(self, instance: FailureInstance,
+                                                 classification: FailureClassification,
+                                                 root_cause: RootCauseAnalysis) -> List[Recommendation]:
+        """Generate code explanation specific recommendations"""
+        recommendations = []
+        
+        # Clarity improvement
+        if "readability" in classification.failure_category.lower():
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_clarity_improvement",
+                recommendation_type=RecommendationType.PROMPT_ENGINEERING,
+                stakeholder_type=StakeholderType.DEVELOPER,
+                title="Explanation Clarity Enhancement",
+                description="Improve code explanation readability and structure",
+                implementation_steps=[
+                    "Develop audience-specific explanation templates",
+                    "Implement structured explanation format",
+                    "Add code complexity analysis",
+                    "Create readability scoring metrics",
+                    "Test with diverse user groups"
+                ],
+                expected_impact=0.75,
+                implementation_effort=0.4,
+                confidence=0.8,
+                priority_score=0.7,
+                evidence=["Poor readability in explanations"],
+                constraints=["Requires user feedback", "Subjective quality measures"]
+            ))
+        
+        return recommendations
+    
+    def _generate_immediate_actions(self, instance: FailureInstance,
+                                  classification: FailureClassification,
+                                  root_cause: RootCauseAnalysis) -> List[Recommendation]:
+        """Generate immediate actionable recommendations for quick wins"""
+        recommendations = []
+        
+        # High-confidence quick fix
+        if root_cause.confidence_score > 0.8:
+            recommendations.append(Recommendation(
+                recommendation_id=f"{instance.input_id}_immediate_fix",
+                recommendation_type=RecommendationType.PROMPT_ENGINEERING,
+                stakeholder_type=StakeholderType.DEVELOPER,
+                title="Immediate Fix Implementation",
+                description=f"Quick resolution for {classification.failure_category} based on high-confidence analysis",
+                implementation_steps=[
+                    "Review primary root cause analysis",
+                    "Implement targeted prompt modifications",
+                    "Test fix on similar cases",
+                    "Monitor for immediate improvements",
+                    "Document solution for future use"
+                ],
+                expected_impact=0.7,
+                implementation_effort=0.2,
+                confidence=root_cause.confidence_score,
+                priority_score=0.9,  # High priority for immediate action
+                evidence=[f"High confidence root cause: {root_cause.primary_cause}"],
+                constraints=["Quick implementation needed"]
+            ))
+        
+        return recommendations
 
 
 class RecommendationEngine:

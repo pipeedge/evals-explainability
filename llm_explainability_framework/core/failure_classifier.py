@@ -192,13 +192,39 @@ class SemanticAttentionClassifier:
         )
     
     def _get_task_specific_patterns(self, task_type: str) -> List[str]:
-        """Get relevant failure patterns for specific task types"""
-        task_patterns = {
+        """Get relevant failure patterns for specific task types, including external patterns"""
+        # Predefined core patterns
+        core_patterns = {
             "NL2NL": ["factual_inconsistency", "hallucination", "information_loss", "stylistic_mismatch"],
             "NL2CODE": ["syntax_error", "logical_error", "inefficiency", "security_vulnerability"],
             "CODE2NL": ["inaccurate_description", "incomplete_explanation", "poor_readability"]
         }
-        return task_patterns.get(task_type, [])
+        
+        # Start with core patterns
+        relevant_patterns = core_patterns.get(task_type, [])
+        
+        # Add external patterns that match the task type
+        if hasattr(self, 'pattern_library') and self.pattern_library:
+            for pattern_id, pattern in getattr(self.pattern_library, 'patterns', {}).items():
+                pattern_category = getattr(pattern, 'category', '').lower()
+                pattern_subcategory = getattr(pattern, 'subcategory', '').lower()
+                
+                # Map task types to pattern categories
+                task_mapping = {
+                    "NL2NL": ["text_generation", "summarization", "translation", "text", "nl2nl"],
+                    "NL2CODE": ["code_generation", "programming", "coding", "nl2code"],
+                    "CODE2NL": ["code_explanation", "documentation", "code2nl"]
+                }
+                
+                task_keywords = task_mapping.get(task_type, [])
+                
+                # Check if pattern matches current task type
+                if any(keyword in pattern_category or keyword in pattern_subcategory 
+                       for keyword in task_keywords):
+                    if pattern_id not in relevant_patterns:
+                        relevant_patterns.append(pattern_id)
+        
+        return relevant_patterns
     
     def _extract_sub_categories(self, instance: FailureInstance, 
                                attention_features: np.ndarray,
@@ -258,9 +284,12 @@ class FailureClassifier:
     for accurate and interpretable failure classification.
     """
     
-    def __init__(self, llm_wrapper: LLMWrapper):
+    def __init__(self, llm_wrapper: LLMWrapper, pattern_library: Optional[Any] = None):
         self.llm = llm_wrapper
         self.semantic_classifier = SemanticAttentionClassifier()
+        self.pattern_library = pattern_library
+        if self.pattern_library is not None:
+            self._ingest_pattern_library()
         
         # Load prompts from the original prompt.md structure
         self._initialize_prompts()
@@ -398,3 +427,42 @@ Analyze the "Model Output (Failed)" in relation to the "Reference Output" and th
         )
         
         return enhanced_result 
+
+    def _ingest_pattern_library(self) -> None:
+        """Ingest external pattern library into the embedded pattern space, combining with predefined patterns."""
+        try:
+            print(f"🔗 Ingesting {len(getattr(self.pattern_library, 'patterns', {}))} external patterns into failure classifier...")
+            
+            ingested_count = 0
+            # Build a mapping from pattern id to embedding using description and indicators
+            for pattern in getattr(self.pattern_library, 'patterns', {}).values():
+                # Compose a representative text for embedding
+                description = getattr(pattern, 'description', '')
+                indicators = ' '.join(getattr(pattern, 'failure_indicators', []) or [])
+                criteria = ' '.join(getattr(pattern, 'detection_criteria', []) or [])
+                repr_text = f"{description} {indicators} {criteria}".strip()
+                if not repr_text:
+                    continue
+                
+                # Add to existing patterns (don't overwrite predefined ones)
+                pattern_id = getattr(pattern, 'pattern_id', f'external_{ingested_count}')
+                if pattern_id not in self.semantic_classifier.failure_patterns:
+                    self.semantic_classifier.failure_patterns[pattern_id] = self.semantic_classifier.embedding_model.encode(repr_text)
+                    ingested_count += 1
+                else:
+                    # Update existing pattern if external one has higher confidence
+                    pattern_confidence = getattr(pattern, 'confidence', 0.0)
+                    if pattern_confidence > 0.8:  # High confidence threshold
+                        self.semantic_classifier.failure_patterns[pattern_id] = self.semantic_classifier.embedding_model.encode(repr_text)
+                        ingested_count += 1
+            
+            total_patterns = len(self.semantic_classifier.failure_patterns)
+            print(f"✅ Successfully combined {ingested_count} external patterns with predefined patterns")
+            print(f"📊 Total patterns available: {total_patterns} (predefined + external)")
+            
+        except Exception as e:
+            print(f"⚠️ Warning: Pattern library ingestion failed: {e}")
+            # Non-blocking: keep default patterns if ingestion fails
+            pass
+
+ 

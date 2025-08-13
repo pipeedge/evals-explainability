@@ -1,8 +1,8 @@
-# MADE: Multi-dimensional Attention-based Diagnostic Framework
+# MADF: Multi-dimensional Attention-based Diagnostic Framework
 
 ## 1. Introduction and Problem Statement
 
-The rapid advancement of Large Language Models (LLMs) has introduced unprecedented challenges in understanding and explaining model failures. Traditional black-box approaches to AI explainability fall short when applied to modern transformer-based architectures, particularly in scenarios involving complex reasoning, code generation, and factual consistency tasks. This paper presents MADE (Multi-dimensional Attention-based Diagnostic Framework), a novel explainability framework that addresses the critical need for comprehensive LLM failure analysis through attention-based interpretability, causal discovery, and stakeholder-aware recommendation systems.
+The rapid advancement of Large Language Models (LLMs) has introduced unprecedented challenges in understanding and explaining model failures. Traditional black-box approaches to AI explainability fall short when applied to modern transformer-based architectures, particularly in scenarios involving complex reasoning, code generation, and factual consistency tasks. This paper presents MADF (Multi-dimensional Attention-based Diagnostic Framework), a novel explainability framework that addresses the critical need for comprehensive LLM failure analysis through attention-based interpretability, causal discovery, and stakeholder-aware recommendation systems.
 
 ### 1.1 Research Gap and Motivation
 
@@ -26,21 +26,21 @@ Recent literature has emphasized the need for comprehensive evaluation framework
 
 ### 2.3 Causal Discovery in AI Systems
 
-The application of causal inference to AI explainability has gained significant attention in recent years. **Davis et al. (2023)** demonstrated the effectiveness of Granger causality for identifying temporal dependencies in neural network failures. **Wilson et al. (2022)** introduced mutual information-based causal discovery for non-linear relationships in AI systems.
+The application of causal inference to AI explainability has gained significant attention in recent years. **Peters et al. (2017)** established the theoretical foundations for causal discovery in machine learning. **Spirtes et al. (2000)** introduced constraint-based causal discovery methods that we adapt for failure analysis.
 
 **Key Contribution**: We combine multiple causality detection methods (Granger causality and mutual information) in an ensemble approach, as suggested by **Anderson et al. (2023)**, to provide robust causal factor identification.
 
 ### 2.4 Stakeholder-Aware Recommendation Systems
 
-Recent research has highlighted the importance of tailoring AI explanations to different user groups. **Taylor et al. (2023)** identified four primary stakeholder types in AI systems: developers, managers, researchers, and end users, each with distinct information needs and decision-making processes. **Garcia et al. (2022)** demonstrated that context-aware recommendation systems significantly improve user satisfaction and actionability.
+Recent research has highlighted the importance of tailoring AI explanations to different user groups. **Doshi-Velez & Kim (2017)** and **Miller (2019)** identified the need for stakeholder-specific explanations in AI systems, with different user groups having distinct information needs and decision-making processes. **Garcia et al. (2022)** demonstrated that context-aware recommendation systems significantly improve user satisfaction and actionability.
 
 **Key Innovation**: Our multi-stakeholder optimization approach extends the work of **Martinez et al. (2023)** by incorporating real-time context adaptation and preference learning.
 
-## 3. MADE Framework Design
+## 3. MADF Framework Design
 
 ### 3.1 Overall Architecture
 
-MADE (Multi-dimensional Attention-based Diagnostic Framework) is designed as a modular, extensible system that integrates multiple analysis components through a unified pipeline. The architecture follows the principles outlined by **Thompson et al. (2023)** for scalable AI explainability systems, incorporating four main components operating in sequence:
+MADF (Multi-dimensional Attention-based Diagnostic Framework) is designed as a modular, extensible system that integrates multiple analysis components through a unified pipeline. The architecture follows the principles outlined by **Thompson et al. (2023)** for scalable AI explainability systems, incorporating four main components operating in sequence:
 
 1. **Failure Classifier (FC)**: Multi-dimensional semantic analysis combining attention mechanisms with semantic embeddings
 2. **Root Cause Analyzer (RCA)**: Causal inference using Graph Neural Networks and counterfactual generation
@@ -80,7 +80,7 @@ flowchart TD
 
 ### 3.2 Component 1: Failure Classifier (FC)
 
-The Failure Classifier represents the first and foundational component of MADE, responsible for multi-dimensional failure categorization using semantic attention mechanisms.
+The Failure Classifier represents the first and foundational component of MADF, responsible for multi-dimensional failure categorization using semantic attention mechanisms.
 
 #### 3.2.1 Mathematical Formulation
 
@@ -151,11 +151,11 @@ These metrics provide comprehensive insights into attention distribution pattern
 
 ### 3.3 Component 2: Root Cause Analyzer (RCA)
 
-The Root Cause Analyzer constitutes the second component of MADE, responsible for discovering causal relationships and generating counterfactual explanations to understand failure mechanisms.
+The Root Cause Analyzer constitutes the second component of MADF, responsible for discovering causal relationships and generating counterfactual explanations to understand failure mechanisms.
 
 #### 3.3.1 Causal Graph Builder
 
-We employ a Graph Neural Network (GNN) to discover causal relationships between features, following **Davis et al. (2023)**. The GNN operates on a feature graph $G = (V, E)$ where vertices $V$ represent features and edges $E$ represent potential causal relationships.
+We employ a Graph Neural Network (GNN) to discover causal relationships between features, building upon the GNN architectures introduced by **Kipf & Welling (2017)** and **Velickovic et al. (2018)**. The GNN operates on a feature graph $G = (V, E)$ where vertices $V$ represent features and edges $E$ represent potential causal relationships.
 
 The node update function is defined as:
 
@@ -165,7 +165,7 @@ where $\mathbf{h}_v^{(l)}$ is the hidden state of node $v$ at layer $l$, $N(v)$ 
 
 #### 3.3.2 Causal Strength Computation
 
-The causal strength between features $X$ and $Y$ is computed using a combination of Granger causality and mutual information, following the ensemble approach suggested by **Miller et al. (2023)**:
+The causal strength between features $X$ and $Y$ is computed using a combination of Granger causality and mutual information, building upon the ensemble causality methods introduced by **Runge et al. (2019)**:
 
 $$CS(X \rightarrow Y) = w_G \cdot GC(X, Y) + w_{MI} \cdot MI(X, Y)$$
 
@@ -199,7 +199,7 @@ where $\tau_{semantic}$ is a threshold for semantic similarity preservation.
 
 ### 3.4 Component 3: Recommendation Engine (RE)
 
-The Recommendation Engine forms the third component of MADE, responsible for generating stakeholder-specific recommendations through multi-objective optimization and adaptive learning.
+The Recommendation Engine forms the third component of MADF, responsible for generating stakeholder-specific recommendations through multi-objective optimization and adaptive learning.
 
 #### 3.4.1 Multi-Stakeholder Optimization
 
@@ -215,7 +215,7 @@ $$f_i(\mathbf{r}) \geq f_i(\mathbf{r}^*) \text{ for all } i \text{ and } f_j(\ma
 
 #### 3.4.2 Stakeholder Classification and Utility Functions
 
-Following **Taylor et al. (2023)**, we identify four primary stakeholder types with specific utility functions:
+Building on the stakeholder analysis framework of **Doshi-Velez & Kim (2017)** and **Miller (2019)**, we identify four primary stakeholder types with specific utility functions:
 
 **1. Developers**: Focus on technical implementation and debugging
 $$f_{dev}(\mathbf{r}) = w_1 \cdot \text{technical\_detail}(\mathbf{r}) + w_2 \cdot (1 - \text{implementation\_effort}(\mathbf{r}))$$
@@ -255,7 +255,7 @@ where $\bar{R}_t(a)$ is the average reward for arm $a$, $t$ is the time step, an
 
 ### 3.5 Component 4: Explainability Reporter (ER)
 
-The Explainability Reporter constitutes the final component of MADE, responsible for generating comprehensive, multi-dimensional quality assessments and interactive visualizations.
+The Explainability Reporter constitutes the final component of MADF, responsible for generating comprehensive, multi-dimensional quality assessments and interactive visualizations.
 
 #### 3.5.1 Multi-Dimensional Quality Assessment
 
@@ -409,7 +409,7 @@ Following the continuous improvement framework proposed by **Anderson et al. (20
 
 #### 5.1.2 Root Cause Analyzer (RCA) Contributions
 
-**Graph Neural Network-Based Causal Discovery** - Extending **Davis et al. (2023)**:
+**Graph Neural Network-Based Causal Discovery** - Building upon **Kipf & Welling (2017)** and **Velickovic et al. (2018)**:
 
 - **Dynamic Causal Graph Construction**: Real-time causal relationship discovery using GNN node update functions
 - **Ensemble Causality Scoring**: Combination of Granger causality and mutual information for robust causal strength computation
@@ -419,7 +419,7 @@ Following the continuous improvement framework proposed by **Anderson et al. (20
 
 #### 5.1.3 Recommendation Engine (RE) Contributions
 
-**Multi-Stakeholder Pareto Optimization** - Extending **Taylor et al. (2023)**:
+**Multi-Stakeholder Pareto Optimization** - Building on **Doshi-Velez & Kim (2017)** and **Miller (2019)**:
 
 - **Stakeholder-Specific Utility Functions**: Mathematical formalization of diverse stakeholder needs
 - **Context-Aware Dynamic Adjustment**: Real-time adaptation based on task type, urgency, and resources
@@ -500,7 +500,7 @@ Following the research directions outlined by **Lee et al. (2023)**, we plan to 
 
 ### 7.3 Enhanced Causality Discovery
 
-Extending the work of **Miller et al. (2023)**, future research will focus on:
+Building upon the ensemble causality methods of **Runge et al. (2019)**, future research will focus on:
 
 - **Deep causal inference methods**
 - **Graph neural network integration**
@@ -509,11 +509,11 @@ Extending the work of **Miller et al. (2023)**, future research will focus on:
 
 ## 8. Conclusion
 
-MADE (Multi-dimensional Attention-based Diagnostic Framework) addresses critical gaps in current AI interpretability research by providing comprehensive, stakeholder-aware failure analysis. The framework's innovative attention-based interpretability, causal graph discovery using GNNs, counterfactual reasoning, and multi-stakeholder optimization represent significant contributions to the field of AI explainability.
+MADF (Multi-dimensional Attention-based Diagnostic Framework) addresses critical gaps in current AI interpretability research by providing comprehensive, stakeholder-aware failure analysis. The framework's innovative attention-based interpretability, causal graph discovery using GNNs, counterfactual reasoning, and multi-stakeholder optimization represent significant contributions to the field of AI explainability.
 
-The theoretical foundations established by recent literature (2022-2023) provide strong support for our methodological choices, while MADE's novel contributions extend the state-of-the-art in several key areas. The framework's practical utility is demonstrated through its application to real-world LLM failure scenarios, providing actionable insights for diverse stakeholder groups.
+The theoretical foundations established by recent literature (2022-2023) provide strong support for our methodological choices, while MADF's novel contributions extend the state-of-the-art in several key areas. The framework's practical utility is demonstrated through its application to real-world LLM failure scenarios, providing actionable insights for diverse stakeholder groups.
 
-Future research will focus on enhancing MADE's adaptability and expanding its applicability to emerging AI architectures and applications.
+Future research will focus on enhancing MADF's adaptability and expanding its applicability to emerging AI architectures and applications.
 
 ---
 
@@ -530,6 +530,13 @@ Future research will focus on enhancing MADE's adaptability and expanding its ap
 - Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). ""Why should I trust you?" Explaining the predictions of any classifier." *KDD 2016*, 1135-1144.
 - Lundberg, S. M., & Lee, S. I. (2017). "A unified approach to interpreting model predictions." *NeurIPS 2017*, 4765-4774.
 - Molnar, C. (2020). "Interpretable Machine Learning: A Guide for Making Black Box Models Explainable." *Lulu.com*.
+
+**Causal Inference and Graph Neural Networks:**
+- Peters, J., Janzing, D., & Schölkopf, B. (2017). "Elements of Causal Inference: Foundations and Learning Algorithms." *MIT Press*.
+- Spirtes, P., Glymour, C., & Scheines, R. (2000). "Causation, Prediction, and Search." *MIT Press*.
+- Kipf, T. N., & Welling, M. (2017). "Semi-supervised classification with graph convolutional networks." *ICLR 2017*.
+- Velickovic, P., Cucurull, G., Casanova, A., Romero, A., Lio, P., & Bengio, Y. (2018). "Graph attention networks." *ICLR 2018*.
+- Runge, J., et al. (2019). "Detecting and quantifying causal associations in large nonlinear time series datasets." *Science Advances*, 5(11), eaau4996.
 
 **Recent LLM Explainability (2022-2023):**
 - Zhang, Y., et al. (2022). "A survey of explainable AI for large language models." *arXiv preprint arXiv:2209.01029*.

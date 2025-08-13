@@ -73,6 +73,7 @@ from llm_explainability_framework import (
     StakeholderType
 )
 from llm_explainability_framework.visualization.reporter import ExplainabilityReporter
+from pattern_library_system import PatternLibrarySystem
 
 # Import our test modules
 from test_humaneval import HumanEvalTester
@@ -88,12 +89,31 @@ class BenchmarkTestRunner:
     
     def __init__(self, llm_wrapper=None, output_dir="benchmark_results"):
         self.llm_wrapper = llm_wrapper or create_default_llm_wrapper()
-        self.output_dir = Path(output_dir)
+        
+        # Create timestamped subdirectory for this benchmark run
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.base_output_dir = Path(output_dir)
+        self.output_dir = self.base_output_dir / f"run_{timestamp}"
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Initialize testers
-        self.humaneval_tester = HumanEvalTester(self.llm_wrapper)
-        self.truthfulqa_tester = TruthfulQATester(self.llm_wrapper)
+        print(f"📁 Benchmark results will be saved to: {self.output_dir}")
+        
+        # Initialize pattern library
+        print("🔧 Initializing Pattern Library for Benchmark Testing...")
+        self.pattern_library = PatternLibrarySystem()
+        
+        # Pre-load patterns from multiple sources (best-effort)
+        try:
+            literature_patterns = self.pattern_library.collect_patterns_from_literature()
+            dataset_patterns = self.pattern_library.collect_patterns_from_datasets()
+            print(f"✅ Pattern library initialized with {len(self.pattern_library.patterns)} patterns")
+        except Exception as e:
+            print(f"⚠️ Warning: Pattern library initialization partial failure: {e}")
+        
+        # Initialize testers with pattern library and shared timestamp for consistent subfolder
+        self.test_results_subdir = f"run_{timestamp}"
+        self.humaneval_tester = HumanEvalTester(self.llm_wrapper, pattern_library=self.pattern_library, results_subdir=self.test_results_subdir)
+        self.truthfulqa_tester = TruthfulQATester(self.llm_wrapper, pattern_library=self.pattern_library, results_subdir=self.test_results_subdir)
         
         # Initialize comprehensive reporter
         self.reporter = ExplainabilityReporter(output_dir=str(self.output_dir))
@@ -314,6 +334,9 @@ class BenchmarkTestRunner:
         print(f"  TruthfulQA truthfulness rate: {comprehensive_results['summary']['dataset_specific_metrics']['truthfulqa_truthfulness_rate']:.2%}")
         print(f"\nResults saved to: {results_file}")
         
+        # Create/update index file for run tracking
+        self._update_run_index(comprehensive_results)
+        
         return comprehensive_results
     
     def _extract_explainability_reports(self, results: Dict[str, Any]) -> List:
@@ -335,6 +358,114 @@ class BenchmarkTestRunner:
                     reports.append(result['analysis_report'])
         
         return reports
+    
+    def _update_run_index(self, comprehensive_results: Dict[str, Any]) -> None:
+        """Create/update index file to track all benchmark runs"""
+        
+        # Create run summary for index
+        run_summary = {
+            "run_id": self.output_dir.name,
+            "timestamp": comprehensive_results["timestamp"],
+            "total_processing_time": comprehensive_results["total_processing_time"],
+            "summary": comprehensive_results["summary"],
+            "benchmark_results_path": str(self.output_dir.relative_to(Path.cwd())),
+            "test_results_path": f"test_results/humaneval/{self.test_results_subdir}, test_results/truthfulqa/{self.test_results_subdir}",
+            "files_generated": {
+                "benchmark_report": str(self.output_dir / "benchmark_report.md"),
+                "comprehensive_results": str(self.output_dir / "comprehensive_benchmark_results.json"),
+                "interactive_dashboard": str(self.output_dir / "comprehensive_benchmark_analysis.html"),
+                "humaneval_report": f"test_results/humaneval/{self.test_results_subdir}/humaneval_analysis_report.json",
+                "truthfulqa_report": f"test_results/truthfulqa/{self.test_results_subdir}/truthfulqa_analysis_report.json"
+            }
+        }
+        
+        # Load existing index or create new one
+        index_file = self.base_output_dir / "run_index.json"
+        if index_file.exists():
+            with open(index_file, 'r') as f:
+                index_data = json.load(f)
+        else:
+            index_data = {
+                "runs": [],
+                "last_updated": None,
+                "total_runs": 0
+            }
+        
+        # Add current run
+        index_data["runs"].append(run_summary)
+        index_data["last_updated"] = datetime.now().isoformat()
+        index_data["total_runs"] = len(index_data["runs"])
+        
+        # Sort runs by timestamp (most recent first)
+        index_data["runs"] = sorted(index_data["runs"], key=lambda x: x["timestamp"], reverse=True)
+        
+        # Save updated index
+        with open(index_file, 'w') as f:
+            json.dump(index_data, f, indent=2)
+        
+        print(f"📝 Updated run index: {index_file}")
+        
+        # Also create a summary index for test_results
+        self._update_test_results_index(comprehensive_results)
+    
+    def _update_test_results_index(self, comprehensive_results: Dict[str, Any]) -> None:
+        """Create/update index file for test results"""
+        
+        # Create separate indices for humaneval and truthfulqa
+        for dataset_name in ["humaneval", "truthfulqa"]:
+            test_results_base = Path(f"test_results/{dataset_name}")
+            index_file = test_results_base / "run_index.json"
+            
+            # Load existing index
+            if index_file.exists():
+                with open(index_file, 'r') as f:
+                    index_data = json.load(f)
+            else:
+                index_data = {
+                    "dataset": dataset_name,
+                    "runs": [],
+                    "last_updated": None,
+                    "total_runs": 0
+                }
+            
+            # Extract dataset-specific results
+            dataset_results = comprehensive_results["datasets"].get(dataset_name, {})
+            
+            run_info = {
+                "run_id": self.test_results_subdir,
+                "timestamp": comprehensive_results["timestamp"],
+                "total_instances": dataset_results.get("total_instances", 0),
+                "successful_analyses": dataset_results.get("successful_analyses", 0),
+                "success_rate": dataset_results.get("success_rate", 0),
+                "processing_time": dataset_results.get("processing_time", 0),
+                "results_file": f"{self.test_results_subdir}/{dataset_name}_analysis_report.json"
+            }
+            
+            # Add dataset-specific metrics
+            if dataset_name == "humaneval":
+                run_info["execution_success_rate"] = dataset_results.get("execution_success_rate", 0)
+                run_info["execution_passed"] = dataset_results.get("execution_passed", 0)
+                run_info["execution_failed"] = dataset_results.get("execution_failed", 0)
+            elif dataset_name == "truthfulqa":
+                run_info["truthfulness_rate"] = dataset_results.get("truthfulness_rate", 0)
+                run_info["truthful_answers"] = dataset_results.get("truthful_answers", 0)
+                run_info["untruthful_answers"] = dataset_results.get("untruthful_answers", 0)
+                run_info["unknown_answers"] = dataset_results.get("unknown_answers", 0)
+            
+            # Add to index
+            index_data["runs"].append(run_info)
+            index_data["last_updated"] = datetime.now().isoformat()
+            index_data["total_runs"] = len(index_data["runs"])
+            
+            # Sort by timestamp (most recent first)
+            index_data["runs"] = sorted(index_data["runs"], key=lambda x: x["timestamp"], reverse=True)
+            
+            # Save index
+            test_results_base.mkdir(parents=True, exist_ok=True)
+            with open(index_file, 'w') as f:
+                json.dump(index_data, f, indent=2)
+            
+            print(f"📝 Updated {dataset_name} test results index: {index_file}")
     
     def generate_benchmark_report(self, results: Dict[str, Any]) -> None:
         """

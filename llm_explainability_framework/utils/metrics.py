@@ -101,8 +101,8 @@ class AttentionAnalyzer:
         """
         Compute cross-attention weights between input and output
         
-        This is a simplified implementation that can be enhanced with actual
-        transformer attention weights when available.
+        Enhanced implementation that better approximates real transformer cross-attention
+        by incorporating positional encoding, multi-head simulation, and improved tokenization.
         """
         # Handle empty text cases
         if not input_text or not input_text.strip():
@@ -110,55 +110,164 @@ class AttentionAnalyzer:
         if not output_text or not output_text.strip():
             output_text = "empty_output"
         
-        # Tokenize texts (simplified) with minimum length check
-        input_tokens = input_text.split()
-        output_tokens = output_text.split()
+        # Improved tokenization (closer to real tokenizers)
+        input_tokens = self._tokenize_text(input_text)
+        output_tokens = self._tokenize_text(output_text)
         
-        # Ensure minimum token count to avoid empty matrices
+        # Ensure minimum token count
         if len(input_tokens) == 0:
             input_tokens = ["empty"]
         if len(output_tokens) == 0:
             output_tokens = ["empty"]
         
-        # Create attention matrix based on token similarity
-        attention_matrix = np.zeros((len(input_tokens), len(output_tokens)))
+        # Get embeddings with positional encoding
+        input_embeddings = self._get_embeddings_with_position(input_tokens)
+        output_embeddings = self._get_embeddings_with_position(output_tokens)
         
+        # Simulate multi-head attention
+        attention_weights = self._multi_head_cross_attention(
+            input_embeddings, output_embeddings, num_heads=8
+        )
+        
+        return attention_weights
+    
+    def _tokenize_text(self, text: str) -> List[str]:
+        """Improved tokenization that better approximates real tokenizers"""
+        # Simple word-level tokenization with special handling
+        tokens = []
+        
+        # Handle code-specific patterns
+        if 'def ' in text or 'class ' in text or 'import ' in text:
+            # Code-aware tokenization
+            import re
+            # Split on common code boundaries
+            code_tokens = re.split(r'(\s+|\(|\)|\[|\]|\{|\}|,|:|;|\.|->|=>)', text)
+            tokens = [t for t in code_tokens if t.strip()]
+        else:
+            # Regular text tokenization
+            tokens = text.split()
+        
+        # Limit token length (like real tokenizers)
+        max_tokens = 512
+        if len(tokens) > max_tokens:
+            tokens = tokens[:max_tokens]
+        
+        return tokens
+    
+    def _get_embeddings_with_position(self, tokens: List[str]) -> np.ndarray:
+        """Get embeddings with positional encoding"""
         semantic_sim = SemanticSimilarity()
         
+        # Get base embeddings
+        embeddings = []
+        for token in tokens:
+            # Use sentence-transformers for better embeddings
+            embedding = semantic_sim.embedding_model.encode([token])[0]
+            embeddings.append(embedding)
+        
+        embeddings = np.array(embeddings)
+        
+        # Add positional encoding
+        pos_encoding = self._get_positional_encoding(len(tokens), embeddings.shape[1])
+        embeddings = embeddings + pos_encoding
+        
+        return embeddings
+    
+    def _get_positional_encoding(self, seq_len: int, d_model: int) -> np.ndarray:
+        """Generate positional encoding similar to transformer models"""
+        pos_encoding = np.zeros((seq_len, d_model))
+        
+        for pos in range(seq_len):
+            for i in range(0, d_model, 2):
+                pos_encoding[pos, i] = np.sin(pos / (10000 ** (i / d_model)))
+                if i + 1 < d_model:
+                    pos_encoding[pos, i + 1] = np.cos(pos / (10000 ** (i / d_model)))
+        
+        return pos_encoding
+    
+    def _multi_head_cross_attention(self, input_embeddings: np.ndarray, 
+                                   output_embeddings: np.ndarray, 
+                                   num_heads: int = 8) -> np.ndarray:
+        """Simulate multi-head cross-attention with robust dimension handling"""
         try:
-            for i, input_token in enumerate(input_tokens):
-                for j, output_token in enumerate(output_tokens):
-                    # Compute semantic similarity between tokens
-                    similarity = semantic_sim.compute_similarity(input_token, output_token)
+            d_model = input_embeddings.shape[1]
+            
+            # Ensure d_model is divisible by num_heads, pad if necessary
+            if d_model % num_heads != 0:
+                # Pad to make divisible
+                pad_size = num_heads - (d_model % num_heads)
+                input_embeddings = np.pad(input_embeddings, ((0, 0), (0, pad_size)), mode='constant')
+                output_embeddings = np.pad(output_embeddings, ((0, 0), (0, pad_size)), mode='constant')
+                d_model = input_embeddings.shape[1]
+            
+            d_k = d_model // num_heads
+            
+            # Initialize random projection matrices (in practice, these would be learned)
+            np.random.seed(42)  # For reproducibility
+            W_q = np.random.randn(d_model, d_model) * 0.1
+            W_k = np.random.randn(d_model, d_model) * 0.1
+            W_v = np.random.randn(d_model, d_model) * 0.1
+            
+            # Project to query, key, value
+            Q = input_embeddings @ W_q
+            K = output_embeddings @ W_k
+            V = output_embeddings @ W_v
+            
+            # Ensure we have valid dimensions for reshaping
+            input_seq_len, output_seq_len = Q.shape[0], K.shape[0]
+            
+            # Reshape for multi-head attention with proper error handling
+            try:
+                Q = Q.reshape(input_seq_len, num_heads, d_k).transpose(0, 1, 2)
+                K = K.reshape(output_seq_len, num_heads, d_k).transpose(0, 1, 2)
+                V = V.reshape(output_seq_len, num_heads, d_k).transpose(0, 1, 2)
+                
+                # Compute attention for each head
+                head_attentions = []
+                for h in range(num_heads):
+                    # Scaled dot-product attention
+                    scores = Q[:, h] @ K[:, h].T / np.sqrt(d_k)
                     
-                    # Handle NaN/inf similarity values
-                    if np.isnan(similarity) or np.isinf(similarity):
-                        similarity = 0.0
-                    
-                    attention_matrix[i, j] = similarity
+                    # Apply softmax
+                    attention_weights = F.softmax(torch.tensor(scores), dim=-1).numpy()
+                    head_attentions.append(attention_weights)
+                
+                # Average attention across heads
+                attention_weights = np.mean(head_attentions, axis=0)
+                
+            except Exception as reshape_error:
+                # Fallback to simple attention computation
+                print(f"Warning: Multi-head reshape failed, using fallback: {reshape_error}")
+                attention_weights = self._simple_attention_fallback(Q, K)
             
-            # Check for all-zero matrix and add small epsilon to diagonal
-            if np.all(attention_matrix == 0):
-                np.fill_diagonal(attention_matrix, 1e-8)
-            
-            # Ensure matrix has valid values
-            attention_matrix = np.nan_to_num(attention_matrix, nan=0.0, posinf=1.0, neginf=0.0)
-            
-            # Add small epsilon to prevent numerical instability in softmax
-            attention_matrix = attention_matrix + 1e-10
-            
-            # Normalize attention weights with numerical stability
-            attention_tensor = torch.tensor(attention_matrix, dtype=torch.float32)
-            attention_weights = F.softmax(attention_tensor, dim=1).numpy()
-            
-            # Final check for NaN values
+            # Ensure numerical stability
             attention_weights = np.nan_to_num(attention_weights, nan=1.0/attention_weights.shape[1])
             
+            return attention_weights
+            
         except Exception as e:
-            print(f"Warning: Error computing attention weights: {e}")
-            # Fallback: uniform attention distribution
-            attention_weights = np.ones((len(input_tokens), len(output_tokens)))
-            attention_weights = attention_weights / attention_weights.sum(axis=1, keepdims=True)
+            print(f"Warning: Multi-head attention failed, using basic similarity: {e}")
+            # Ultimate fallback: simple cosine similarity
+            return self._basic_similarity_fallback(input_embeddings, output_embeddings)
+    
+    def _simple_attention_fallback(self, Q: np.ndarray, K: np.ndarray) -> np.ndarray:
+        """Simple attention fallback when multi-head fails"""
+        # Compute simple dot-product attention
+        scores = Q @ K.T
+        # Apply softmax
+        attention_weights = F.softmax(torch.tensor(scores), dim=-1).numpy()
+        return attention_weights
+    
+    def _basic_similarity_fallback(self, input_embeddings: np.ndarray, output_embeddings: np.ndarray) -> np.ndarray:
+        """Basic similarity fallback when all attention methods fail"""
+        # Compute cosine similarity matrix
+        input_norm = input_embeddings / (np.linalg.norm(input_embeddings, axis=1, keepdims=True) + 1e-8)
+        output_norm = output_embeddings / (np.linalg.norm(output_embeddings, axis=1, keepdims=True) + 1e-8)
+        similarity = input_norm @ output_norm.T
+        
+        # Normalize to attention-like weights
+        attention_weights = np.maximum(similarity, 0)  # Ensure non-negative
+        attention_weights = attention_weights / (np.sum(attention_weights, axis=1, keepdims=True) + 1e-8)
         
         return attention_weights
     

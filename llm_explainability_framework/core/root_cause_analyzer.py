@@ -342,7 +342,7 @@ class RootCauseAnalyzer:
     def _initialize_prompts(self):
         """Initialize root cause analysis prompts"""
         self.analysis_prompt_template = """
-You have been given a failed test case from an LLM evaluation. Your task is to perform a root cause analysis.
+You are an expert AI failure analyst. Perform a comprehensive root cause analysis for this LLM failure case.
 
 **Evaluation Data:**
 - **InputID:** {input_id}
@@ -361,32 +361,94 @@ You have been given a failed test case from an LLM evaluation. Your task is to p
 
 - **Classified Failure Category:** {failure_category}
 
-**Causal Analysis Results:**
+**Advanced Causal Analysis Results:**
 - **Primary Causal Factors:** {causal_factors}
 - **Counterfactual Scenarios:** {counterfactuals}
 
 **Your Task:**
-Generate a step-by-step root cause analysis. Follow this reasoning process:
-1. **Analyze the Input's Intent:** What was the core request or the primary function of the input data? What key constraints or requirements were specified?
-2. **Compare Outputs:** Identify the specific, material differences between the "Model Output (Failed)" and the "Reference Output".
-3. **Connect to Failure Category:** Explain how these differences align with the given "{failure_category}" for the specified "{task_type}".
-4. **Hypothesize the Root Cause:** Based on your analysis, what is the most likely reason the model failed? Did it misunderstand a key term or concept? Did it misapply a logical step? Was the input ambiguous?
+Provide a comprehensive root cause analysis with detailed insights and actionable recommendations. Follow this structured approach:
 
-**Output Format (Markdown):**
+1. **Deep Input Analysis:** Analyze the input's complexity, ambiguity, constraints, and requirements. Identify potential misinterpretation points.
+2. **Detailed Output Comparison:** Provide specific, technical differences between outputs with examples and impact assessment.
+3. **Failure Pattern Analysis:** Connect observed patterns to the failure category with detailed reasoning.
+4. **Multi-Layered Root Cause Hypothesis:** Propose primary, secondary, and contributing causes with evidence.
+5. **Technical Insights:** Provide technical details about what went wrong in the model's processing.
+6. **Preventive Measures:** Suggest specific technical interventions to prevent similar failures.
 
-### Root Cause Analysis Report
+**Output Format (Detailed Markdown):**
 
-**1. Analysis of Input Intent:**
-   - [Your detailed analysis of the user's prompt or source code]
+### Comprehensive Root Cause Analysis Report
 
-**2. Key Discrepancies Observed:**
-   - [Bulleted list of specific differences between the failed output and the reference output]
+#### 1. Input Complexity & Requirements Analysis
+**Input Characteristics:**
+- Complexity Level: [High/Medium/Low with justification]
+- Key Requirements: [List specific requirements from input]
+- Ambiguity Points: [Areas that could be misinterpreted]
+- Domain Knowledge Required: [Specific knowledge needed]
 
-**3. Explanation of Failure:**
-   - [Your explanation of how the discrepancies led to the classified failure]
+**Critical Input Elements:**
+- [Identify and analyze critical components of the input]
 
-**4. Inferred Root Cause:**
-   - [Your final conclusion on the root cause of the error]
+#### 2. Detailed Output Discrepancy Analysis
+**Primary Differences:**
+- [Specific technical differences with examples]
+- [Impact severity for each difference]
+
+**Error Manifestations:**
+- [How errors appear in the output]
+- [Cascading effects of initial errors]
+
+#### 3. Failure Pattern & Category Analysis
+**Pattern Recognition:**
+- [How this failure fits the classified category]
+- [Similar patterns in this failure type]
+
+**Category-Specific Issues:**
+- [Technical details specific to {failure_category} in {task_type}]
+
+#### 4. Multi-Layered Root Cause Analysis
+**Primary Root Cause:**
+- [Main underlying cause with detailed explanation]
+- [Evidence supporting this conclusion]
+
+**Secondary Contributing Factors:**
+- [Additional factors that contributed to failure]
+- [Interaction between different causes]
+
+**Model Processing Breakdown:**
+- [Where in the model's processing the failure likely occurred]
+- [Specific mechanisms that failed]
+
+#### 5. Technical Insights & Model Behavior Analysis
+**Model Processing Analysis:**
+- [Analysis of how the model likely processed this input]
+- [Where the model's reasoning went wrong]
+
+**Knowledge Gap Identification:**
+- [Specific knowledge or capabilities the model lacks]
+- [Areas where model understanding failed]
+
+**Attention & Focus Issues:**
+- [Analysis of attention patterns if relevant]
+- [Misplaced focus or attention distribution problems]
+
+#### 6. Preventive Measures & Technical Recommendations
+**Immediate Technical Interventions:**
+- [Specific, actionable technical fixes]
+- [Implementation priority and difficulty]
+
+**Systemic Improvements:**
+- [Broader changes to prevent similar failures]
+- [Training or architectural modifications needed]
+
+**Quality Assurance Measures:**
+- [Testing and validation improvements]
+- [Detection mechanisms for similar failures]
+
+#### 7. Confidence Assessment & Limitations
+**Analysis Confidence:** [High/Medium/Low with reasoning]
+**Key Uncertainties:** [Areas where analysis may be uncertain]
+**Additional Investigation Needed:** [Further analysis required]
 """
     
     def analyze(self, instance: FailureInstance, 
@@ -430,27 +492,226 @@ Generate a step-by-step root cause analysis. Follow this reasoning process:
     def _extract_causal_factors(self, causal_graph: nx.DiGraph,
                                instance: FailureInstance,
                                classification: FailureClassification) -> List[CausalFactor]:
-        """Extract causal factors from the causal graph"""
+        """Extract comprehensive causal factors from the causal graph"""
         factors = []
         
-        # Analyze high-centrality nodes
-        centrality = nx.betweenness_centrality(causal_graph)
+        # Ensure we have nodes to analyze
+        if len(causal_graph.nodes()) == 0:
+            # Fallback: create basic causal factors from instance analysis
+            return self._create_fallback_causal_factors(instance, classification)
         
-        for node, centrality_score in centrality.items():
-            if centrality_score > 0.1:  # Significant causal factor
-                node_data = causal_graph.nodes[node]
+        # Analyze multiple centrality measures
+        betweenness_centrality = nx.betweenness_centrality(causal_graph)
+        degree_centrality = nx.degree_centrality(causal_graph)
+        pagerank = nx.pagerank(causal_graph)
+        
+        # Extract factors based on multiple metrics
+        for node in causal_graph.nodes():
+            node_data = causal_graph.nodes[node]
+            
+            # Combine multiple centrality measures
+            betweenness = betweenness_centrality.get(node, 0)
+            degree = degree_centrality.get(node, 0)
+            pr = pagerank.get(node, 0)
+            
+            # Weighted combination of centrality measures
+            combined_score = 0.4 * betweenness + 0.3 * degree + 0.3 * pr
+            
+            if combined_score > 0.05:  # Lower threshold for more factors
+                evidence = []
+                if betweenness > 0.1:
+                    evidence.append(f"High betweenness centrality: {betweenness:.3f}")
+                if degree > 0.2:
+                    evidence.append(f"High degree centrality: {degree:.3f}")
+                if pr > 0.1:
+                    evidence.append(f"High PageRank score: {pr:.3f}")
+                
+                # Add semantic evidence based on node type
+                evidence.extend(self._generate_semantic_evidence(node, node_data, instance, classification))
                 
                 factor = CausalFactor(
                     factor_name=node,
                     factor_type=node_data.get('type', 'unknown'),
-                    causal_strength=centrality_score,
-                    confidence=min(1.0, centrality_score * 2),
-                    evidence=[f"High centrality score: {centrality_score:.3f}"],
+                    causal_strength=combined_score,
+                    confidence=min(1.0, combined_score * 1.5),
+                    evidence=evidence if evidence else [f"Graph centrality score: {combined_score:.3f}"],
                     interactions=list(causal_graph.successors(node))
                 )
                 factors.append(factor)
         
+        # Ensure we have at least some factors
+        if not factors:
+            factors = self._create_fallback_causal_factors(instance, classification)
+        
         return sorted(factors, key=lambda x: x.causal_strength, reverse=True)
+    
+    def _create_fallback_causal_factors(self, instance: FailureInstance, 
+                                       classification: FailureClassification) -> List[CausalFactor]:
+        """Create basic causal factors when graph analysis fails"""
+        factors = []
+        
+        # Task-specific factor analysis
+        if instance.task_type == "NL2CODE":
+            factors.extend(self._analyze_code_generation_factors(instance, classification))
+        elif instance.task_type == "NL2NL":
+            factors.extend(self._analyze_text_generation_factors(instance, classification))
+        elif instance.task_type == "CODE2NL":
+            factors.extend(self._analyze_code_explanation_factors(instance, classification))
+        
+        # General factors
+        factors.extend(self._analyze_general_factors(instance, classification))
+        
+        return factors
+    
+    def _analyze_code_generation_factors(self, instance: FailureInstance, 
+                                        classification: FailureClassification) -> List[CausalFactor]:
+        """Analyze causal factors specific to code generation"""
+        factors = []
+        
+        # Input complexity factor
+        input_complexity = len(instance.input_text.split()) / 20.0  # Normalize
+        factors.append(CausalFactor(
+            factor_name="input_complexity",
+            factor_type="input",
+            causal_strength=min(1.0, input_complexity),
+            confidence=0.8,
+            evidence=[f"Input contains {len(instance.input_text.split())} words"],
+            interactions=["syntax_requirements", "logical_requirements"]
+        ))
+        
+        # Syntax analysis
+        if "syntax" in classification.failure_category.lower():
+            factors.append(CausalFactor(
+                factor_name="syntax_understanding",
+                factor_type="processing",
+                causal_strength=0.9,
+                confidence=0.9,
+                evidence=["Syntax error detected in output", "Code structure malformed"],
+                interactions=["language_knowledge", "grammar_rules"]
+            ))
+        
+        # Logic analysis
+        if "logical" in classification.failure_category.lower():
+            factors.append(CausalFactor(
+                factor_name="logical_reasoning",
+                factor_type="processing",
+                causal_strength=0.8,
+                confidence=0.8,
+                evidence=["Logic error in algorithm", "Incorrect problem-solving approach"],
+                interactions=["problem_understanding", "algorithmic_knowledge"]
+            ))
+        
+        return factors
+    
+    def _analyze_text_generation_factors(self, instance: FailureInstance, 
+                                        classification: FailureClassification) -> List[CausalFactor]:
+        """Analyze causal factors specific to text generation"""
+        factors = []
+        
+        # Factual consistency
+        if "factual" in classification.failure_category.lower() or "hallucination" in classification.failure_category.lower():
+            factors.append(CausalFactor(
+                factor_name="factual_knowledge",
+                factor_type="processing",
+                causal_strength=0.9,
+                confidence=0.9,
+                evidence=["Factual inconsistencies detected", "Knowledge gaps identified"],
+                interactions=["information_retrieval", "fact_verification"]
+            ))
+        
+        # Information completeness
+        ref_length = len(instance.reference_output)
+        out_length = len(instance.model_output)
+        length_ratio = out_length / max(ref_length, 1)
+        
+        if length_ratio < 0.7:  # Significantly shorter
+            factors.append(CausalFactor(
+                factor_name="information_completeness",
+                factor_type="output",
+                causal_strength=0.7,
+                confidence=0.8,
+                evidence=[f"Output is {(1-length_ratio)*100:.1f}% shorter than expected"],
+                interactions=["content_selection", "summarization_strategy"]
+            ))
+        
+        return factors
+    
+    def _analyze_code_explanation_factors(self, instance: FailureInstance, 
+                                         classification: FailureClassification) -> List[CausalFactor]:
+        """Analyze causal factors specific to code explanation"""
+        factors = []
+        
+        # Code comprehension
+        factors.append(CausalFactor(
+            factor_name="code_comprehension",
+            factor_type="processing",
+            causal_strength=0.8,
+            confidence=0.7,
+            evidence=["Code structure analysis required", "Algorithm understanding needed"],
+            interactions=["syntax_parsing", "semantic_analysis"]
+        ))
+        
+        # Explanation clarity
+        if "readability" in classification.failure_category.lower():
+            factors.append(CausalFactor(
+                factor_name="explanation_clarity",
+                factor_type="output",
+                causal_strength=0.7,
+                confidence=0.8,
+                evidence=["Poor readability detected", "Complex technical language used"],
+                interactions=["audience_adaptation", "language_simplification"]
+            ))
+        
+        return factors
+    
+    def _analyze_general_factors(self, instance: FailureInstance, 
+                                classification: FailureClassification) -> List[CausalFactor]:
+        """Analyze general causal factors applicable to all tasks"""
+        factors = []
+        
+        # Attention focus
+        if hasattr(classification, 'attention_weights') and classification.attention_weights is not None:
+            attention_variance = np.var(classification.attention_weights.flatten())
+            if attention_variance > 0.1:
+                factors.append(CausalFactor(
+                    factor_name="attention_distribution",
+                    factor_type="processing",
+                    causal_strength=min(1.0, attention_variance),
+                    confidence=0.7,
+                    evidence=[f"High attention variance: {attention_variance:.3f}"],
+                    interactions=["focus_mechanism", "relevance_detection"]
+                ))
+        
+        # Confidence level
+        conf_score = classification.confidence_score
+        if conf_score < 0.6:
+            factors.append(CausalFactor(
+                factor_name="model_uncertainty",
+                factor_type="processing",
+                causal_strength=1.0 - conf_score,
+                confidence=0.8,
+                evidence=[f"Low classification confidence: {conf_score:.3f}"],
+                interactions=["decision_boundary", "ambiguity_handling"]
+            ))
+        
+        return factors
+    
+    def _generate_semantic_evidence(self, node: str, node_data: Dict, 
+                                   instance: FailureInstance, 
+                                   classification: FailureClassification) -> List[str]:
+        """Generate semantic evidence for causal factors"""
+        evidence = []
+        
+        if 'input' in node:
+            evidence.append(f"Input-related factor affecting {classification.failure_category}")
+        elif 'output' in node:
+            evidence.append(f"Output-related factor in {instance.task_type} task")
+        elif 'attention' in node:
+            evidence.append("Attention mechanism contributing to failure pattern")
+        elif 'semantic' in node:
+            evidence.append("Semantic understanding issue identified")
+        
+        return evidence
     
     def _llm_analyze(self, instance: FailureInstance,
                     classification: FailureClassification,

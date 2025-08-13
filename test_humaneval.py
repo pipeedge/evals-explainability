@@ -15,6 +15,7 @@ from dataclasses import dataclass, asdict
 import asyncio
 import time
 import numpy as np
+from datetime import datetime
 
 # JSON serialization helper
 
@@ -114,13 +115,24 @@ class HumanEvalTester:
     with 164 hand-written programming problems with unit tests.
     """
     
-    def __init__(self, llm_wrapper=None):
-        self.engine = ExplainabilityEngine(llm_wrapper or create_default_llm_wrapper())
+    def __init__(self, llm_wrapper=None, pattern_library=None, results_subdir=None):
+        self.engine = ExplainabilityEngine(
+            llm_wrapper or create_default_llm_wrapper(), 
+            pattern_library=pattern_library
+        )
         self.dataset_path = "datasets/humaneval"
-        self.results_path = "test_results/humaneval"
+        
+        # Create timestamped subdirectory if not provided
+        if results_subdir is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            results_subdir = f"run_{timestamp}"
+        
+        self.base_results_path = Path("test_results/humaneval")
+        self.results_path = self.base_results_path / results_subdir
         
         # Create directories if they don't exist
-        Path(self.results_path).mkdir(parents=True, exist_ok=True)
+        self.results_path.mkdir(parents=True, exist_ok=True)
+        print(f"📁 HumanEval results will be saved to: {self.results_path}")
         
     def load_humaneval_dataset(self) -> List[Dict[str, Any]]:
         """

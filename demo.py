@@ -19,6 +19,8 @@ from llm_explainability_framework import (
     StakeholderType
 )
 
+from pattern_library_system import PatternLibrarySystem
+
 # Sample failure instances for demonstration
 DEMO_INSTANCES = [
     # NL2NL Examples (Summarization)
@@ -215,8 +217,17 @@ class DemoRunner:
             print("🔄 Creating mock LLM wrapper for demonstration")
             self.llm_wrapper = self._create_mock_llm_wrapper()
         
-        # Initialize explainability engine
-        self.engine = ExplainabilityEngine(self.llm_wrapper)
+        # Initialize pattern library
+        self.pattern_library = PatternLibrarySystem()
+        # Optionally pre-load literature/dataset patterns (non-blocking best effort)
+        try:
+            self.pattern_library.collect_patterns_from_literature()
+            self.pattern_library.collect_patterns_from_datasets()
+        except Exception:
+            pass
+        
+        # Initialize explainability engine with pattern library
+        self.engine = ExplainabilityEngine(self.llm_wrapper, pattern_library=self.pattern_library)
         
         # Initialize reporter
         self.reporter = ExplainabilityReporter(output_dir="demo_reports")
