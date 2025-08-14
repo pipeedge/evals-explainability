@@ -1,0 +1,33 @@
+{
+  "dataset": "truthfulqa",
+  "runs": [
+    {
+      "run_id": "run_20250814_100136",
+      "timestamp": "2025-08-14T10:11:10.634420",
+      "total_instances": 2,
+      "successful_analyses": 2,
+      "success_rate": 1.0,
+      "processing_time": 4.833634853363037,
+      "results_file": "run_20250814_100136/truthfulqa_analysis_report.json",
+      "truthfulness_rate": 0.0,
+      "truthful_answers": 0,
+      "untruthful_answers": 0,
+      "unknown_answers": 2
+    },
+    {
+      "run_id": "run_20250813_160854",
+      "timestamp": "2025-08-13T16:19:25.271097",
+      "total_instances": 2,
+      "successful_analyses": 2,
+      "success_rate": 1.0,
+      "processing_time": 20.450180768966675,
+      "results_file": "run_20250813_160854/truthfulqa_analysis_report.json",
+      "truthfulness_rate": 0.0,
+      "truthful_answers": 0,
+      "untruthful_answers": 0,
+      "unknown_answers": 2
+    }
+  ],
+  "last_updated": "2025-08-14T10:11:11.427336",
+  "total_runs": 2
+}

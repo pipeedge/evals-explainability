@@ -19,7 +19,8 @@ from llm_explainability_framework import (
     StakeholderType
 )
 
-from pattern_library_system import PatternLibrarySystem
+from llm_explainability_framework.core.pattern import PatternLibrarySystem
+from llm_explainability_framework.core.surrogate import SurrogateModelIntegration
 
 # Sample failure instances for demonstration
 DEMO_INSTANCES = [
@@ -217,17 +218,52 @@ class DemoRunner:
             print("🔄 Creating mock LLM wrapper for demonstration")
             self.llm_wrapper = self._create_mock_llm_wrapper()
         
-        # Initialize pattern library
+        # Initialize surrogate model integration
+        try:
+            self.surrogate_integration = SurrogateModelIntegration()
+            print("✅ Surrogate model integration initialized")
+        except Exception as e:
+            print(f"⚠️ Warning: Surrogate model integration failed: {e}")
+            self.surrogate_integration = None
+        
+        # Initialize pattern library with persistence
         self.pattern_library = PatternLibrarySystem()
-        # Optionally pre-load literature/dataset patterns (non-blocking best effort)
+        
+        # Try to load existing patterns first
+        pattern_cache_file = Path("pattern_library_cache.json")
+        if pattern_cache_file.exists():
+            try:
+                self.pattern_library.import_patterns(str(pattern_cache_file))
+                print(f"✅ Loaded {len(self.pattern_library.patterns)} patterns from cache")
+            except Exception as e:
+                print(f"⚠️ Warning: Failed to load pattern cache: {e}")
+                print("🔄 Regenerating patterns...")
+                self._regenerate_patterns()
+        else:
+            print("🔄 No pattern cache found, generating patterns...")
+            self._regenerate_patterns()
+        
+        # Save patterns for future runs
+        try:
+            self.pattern_library.export_patterns(str(pattern_cache_file))
+            print(f"💾 Saved {len(self.pattern_library.patterns)} patterns to cache")
+        except Exception as e:
+            print(f"⚠️ Warning: Failed to save pattern cache: {e}")
+    
+    def _regenerate_patterns(self):
+        """Regenerate patterns from multiple sources"""
         try:
             self.pattern_library.collect_patterns_from_literature()
             self.pattern_library.collect_patterns_from_datasets()
         except Exception:
             pass
         
-        # Initialize explainability engine with pattern library
-        self.engine = ExplainabilityEngine(self.llm_wrapper, pattern_library=self.pattern_library)
+        # Initialize explainability engine with enhanced components
+        self.engine = ExplainabilityEngine(
+            self.llm_wrapper, 
+            pattern_library=self.pattern_library,
+            surrogate_integration=self.surrogate_integration
+        )
         
         # Initialize reporter
         self.reporter = ExplainabilityReporter(output_dir="demo_reports")

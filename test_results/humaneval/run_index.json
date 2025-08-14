@@ -1,0 +1,31 @@
+{
+  "dataset": "humaneval",
+  "runs": [
+    {
+      "run_id": "run_20250814_100136",
+      "timestamp": "2025-08-14T10:11:10.634420",
+      "total_instances": 2,
+      "successful_analyses": 2,
+      "success_rate": 1.0,
+      "processing_time": 10.20071792602539,
+      "results_file": "run_20250814_100136/humaneval_analysis_report.json",
+      "execution_success_rate": 1.0,
+      "execution_passed": 2,
+      "execution_failed": 0
+    },
+    {
+      "run_id": "run_20250813_160854",
+      "timestamp": "2025-08-13T16:19:25.271097",
+      "total_instances": 2,
+      "successful_analyses": 2,
+      "success_rate": 1.0,
+      "processing_time": 20.79455804824829,
+      "results_file": "run_20250813_160854/humaneval_analysis_report.json",
+      "execution_success_rate": 1.0,
+      "execution_passed": 2,
+      "execution_failed": 0
+    }
+  ],
+  "last_updated": "2025-08-14T10:11:11.426516",
+  "total_runs": 2
+}

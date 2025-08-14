@@ -92,17 +92,51 @@ class AttentionAnalyzer:
     
     Innovation: Cross-modal attention analysis that captures relationships
     between different parts of input, processing, and output.
+    
+    Now supports surrogate model integration for improved attention computation.
     """
     
-    def __init__(self):
+    def __init__(self, surrogate_integration=None):
         self.scaler = StandardScaler()
+        self.surrogate_integration = surrogate_integration
         
-    def compute_cross_attention(self, input_text: str, output_text: str) -> np.ndarray:
+        # Try to import surrogate integration if not provided
+        if self.surrogate_integration is None:
+            try:
+                from ..core.surrogate.integrate_surrogate_models import SurrogateModelIntegration
+                self.surrogate_integration = SurrogateModelIntegration()
+                print("✅ Surrogate model integration loaded for enhanced attention computation")
+            except ImportError:
+                print("⚠️  Surrogate model integration not available, using fallback attention computation")
+                self.surrogate_integration = None
+        
+    def compute_cross_attention(self, input_text: str, output_text: str, task_type: str = "general") -> np.ndarray:
         """
         Compute cross-attention weights between input and output
         
         Enhanced implementation that better approximates real transformer cross-attention
         by incorporating positional encoding, multi-head simulation, and improved tokenization.
+        
+        Now optionally uses surrogate models for better attention computation.
+        """
+        
+        # Try to use surrogate model integration if available
+        if self.surrogate_integration is not None:
+            try:
+                surrogate_result = self.surrogate_integration.compute_enhanced_cross_attention(
+                    input_text, output_text, task_type
+                )
+                print(f"🔧 Using surrogate model: {surrogate_result.model_name} (confidence: {surrogate_result.confidence:.3f})")
+                return surrogate_result.attention_weights
+            except Exception as e:
+                print(f"⚠️  Surrogate attention failed, using fallback: {e}")
+        
+        # Fallback to original implementation
+        return self._compute_fallback_cross_attention(input_text, output_text)
+    
+    def _compute_fallback_cross_attention(self, input_text: str, output_text: str) -> np.ndarray:
+        """
+        Fallback cross-attention computation using original implementation
         """
         # Handle empty text cases
         if not input_text or not input_text.strip():
@@ -672,9 +706,10 @@ class ExplainabilityMetrics:
     technical accuracy, user comprehension, and practical utility.
     """
     
-    def __init__(self):
+    def __init__(self, surrogate_integration=None):
         self.semantic_similarity = SemanticSimilarity()
         self.ranker = RecommendationRanker()
+        self.attention_analyzer = AttentionAnalyzer(surrogate_integration=surrogate_integration)
         
     def compute_explanation_quality(self, explanation: str, 
                                   ground_truth: Optional[str] = None,

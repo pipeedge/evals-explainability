@@ -1,0 +1,580 @@
+{
+  "patterns": [
+    {
+      "pattern_id": "lit_syntax_errors_missing_colon",
+      "category": "code_generation",
+      "subcategory": "syntax_errors",
+      "description": "Missing colon after function/class definition",
+      "severity": "PatternSeverity.HIGH",
+      "defining_triggers": [
+        "Missing syntax elements",
+        "Incorrect syntax structure",
+        "Language rule violations",
+        "Token sequence errors"
+      ],
+      "trigger_frequency": {
+        "missing_elements": 0.65,
+        "incorrect_structure": 0.45,
+        "rule_violations": 0.55,
+        "token_errors": 0.35
+      },
+      "trigger_contexts": [
+        "function_definitions",
+        "class_declarations",
+        "control_structures",
+        "expressions"
+      ],
+      "examples": [
+        {
+          "input_text": "Write a function to calculate factorial",
+          "model_output": "def factorial(n)\n    if n <= 1: return 1\n    return n * factorial(n-1)",
+          "reference_output": "def factorial(n):\n    if n <= 1: return 1\n    return n * factorial(n-1)",
+          "failure_type": "syntax_error",
+          "failure_description": "Missing colon after function definition",
+          "severity_score": 0.8,
+          "detection_method": "AST parsing",
+          "source_dataset": "HumanEval",
+          "expert_verified": false,
+          "validation_score": 0.0
+        }
+      ],
+      "detection_criteria": [
+        "AST syntax error",
+        "missing colon",
+        "function definition"
+      ],
+      "failure_indicators": [
+        "SyntaxError",
+        "invalid syntax",
+        "missing colon"
+      ],
+      "hypothesised_causes": [
+        "Incomplete syntax knowledge in training data",
+        "Insufficient syntax pattern exposure",
+        "Token generation sequence errors",
+        "Language model attention misalignment"
+      ],
+      "causal_evidence": {
+        "training_data_gaps": 0.85,
+        "attention_misalignment": 0.7,
+        "token_generation_errors": 0.75,
+        "pattern_overfitting": 0.6
+      },
+      "causal_relationships": [
+        [
+          "incomplete_syntax_knowledge",
+          "missing_elements",
+          0.85
+        ],
+        [
+          "attention_misalignment",
+          "incorrect_structure",
+          0.7
+        ],
+        [
+          "token_sequence_errors",
+          "malformed_syntax",
+          0.8
+        ]
+      ],
+      "counterfactuals": [
+        {
+          "fix_description": "Add missing colon after function definition",
+          "fix_code": "def factorial(n):",
+          "fix_text": "",
+          "fix_strategy": "syntax_correction",
+          "success_rate": 0.95,
+          "implementation_difficulty": "low",
+          "validation_results": {}
+        }
+      ],
+      "prevention_strategies": [
+        "Use linters",
+        "Check syntax before execution"
+      ],
+      "remediation_effectiveness": {
+        "syntax_checking": 0.9,
+        "prompt_engineering": 0.75,
+        "constrained_generation": 0.85,
+        "post_processing": 0.7
+      },
+      "quantitative_metrics": {
+        "total_examples": 1,
+        "trigger_count": 4,
+        "cause_hypotheses_count": 4,
+        "remediation_strategies_count": 2,
+        "annotation_density": 0.9333333333333333
+      },
+      "qualitative_metrics": {
+        "expert_rating": 0.8,
+        "coherence": 0.85
+      },
+      "benchmark_sources": [
+        "HumanEval",
+        "MBPP",
+        "APPS"
+      ],
+      "source_distribution": {
+        "HumanEval": 15,
+        "MBPP": 12,
+        "APPS": 8
+      },
+      "cross_benchmark_validation": {
+        "HumanEval": 0.85,
+        "MBPP": 0.82,
+        "APPS": 0.78
+      },
+      "validation_metrics": {
+        "literature_support": 0.9,
+        "empirical_validation": 0.8,
+        "coverage": 0.6,
+        "specificity": 0.8,
+        "actionability": 0.7,
+        "reliability": 0.9,
+        "overall_score": 0.7499999999999999
+      },
+      "source": "PatternSource.LITERATURE",
+      "representative_count": 1,
+      "instance_diversity_score": 0.0,
+      "pattern_signature": "",
+      "pattern_coverage": 0.0,
+      "annotation_completeness": 0.0,
+      "expert_consensus_score": 0.0,
+      "pattern_coherence": 0.0,
+      "expert_verification": false,
+      "confidence": 0.7499999999999999,
+      "last_updated": "2025-08-14 10:01:40.535396",
+      "usage_count": 0
+    },
+    {
+      "pattern_id": "lit_syntax_errors_undefined_variable",
+      "category": "code_generation",
+      "subcategory": "syntax_errors",
+      "description": "Using variable before definition",
+      "severity": "PatternSeverity.HIGH",
+      "defining_triggers": [
+        "Missing syntax elements",
+        "Incorrect syntax structure",
+        "Language rule violations",
+        "Token sequence errors"
+      ],
+      "trigger_frequency": {
+        "missing_elements": 0.65,
+        "incorrect_structure": 0.45,
+        "rule_violations": 0.55,
+        "token_errors": 0.35
+      },
+      "trigger_contexts": [
+        "function_definitions",
+        "class_declarations",
+        "control_structures",
+        "expressions"
+      ],
+      "examples": [
+        {
+          "input_text": "Write a function to sort a list",
+          "model_output": "def sort_list(arr):\n    return sorted(unsorted_list)",
+          "reference_output": "def sort_list(arr):\n    return sorted(arr)",
+          "failure_type": "syntax_error",
+          "failure_description": "Undefined variable 'unsorted_list'",
+          "severity_score": 0.7,
+          "detection_method": "variable analysis",
+          "source_dataset": "HumanEval",
+          "expert_verified": false,
+          "validation_score": 0.0
+        }
+      ],
+      "detection_criteria": [
+        "undefined variable",
+        "NameError",
+        "variable scope"
+      ],
+      "failure_indicators": [
+        "NameError",
+        "undefined variable",
+        "not defined"
+      ],
+      "hypothesised_causes": [
+        "Incomplete syntax knowledge in training data",
+        "Insufficient syntax pattern exposure",
+        "Token generation sequence errors",
+        "Language model attention misalignment"
+      ],
+      "causal_evidence": {
+        "training_data_gaps": 0.85,
+        "attention_misalignment": 0.7,
+        "token_generation_errors": 0.75,
+        "pattern_overfitting": 0.6
+      },
+      "causal_relationships": [
+        [
+          "incomplete_syntax_knowledge",
+          "missing_elements",
+          0.85
+        ],
+        [
+          "attention_misalignment",
+          "incorrect_structure",
+          0.7
+        ],
+        [
+          "token_sequence_errors",
+          "malformed_syntax",
+          0.8
+        ]
+      ],
+      "counterfactuals": [
+        {
+          "fix_description": "Use correct variable name",
+          "fix_code": "return sorted(arr)",
+          "fix_text": "",
+          "fix_strategy": "variable_correction",
+          "success_rate": 0.9,
+          "implementation_difficulty": "low",
+          "validation_results": {}
+        }
+      ],
+      "prevention_strategies": [
+        "Check variable definitions",
+        "Use IDE features"
+      ],
+      "remediation_effectiveness": {
+        "syntax_checking": 0.9,
+        "prompt_engineering": 0.75,
+        "constrained_generation": 0.85,
+        "post_processing": 0.7
+      },
+      "quantitative_metrics": {
+        "total_examples": 1,
+        "trigger_count": 4,
+        "cause_hypotheses_count": 4,
+        "remediation_strategies_count": 2,
+        "annotation_density": 0.9333333333333333
+      },
+      "qualitative_metrics": {
+        "expert_rating": 0.8,
+        "coherence": 0.85
+      },
+      "benchmark_sources": [
+        "HumanEval",
+        "MBPP",
+        "APPS"
+      ],
+      "source_distribution": {
+        "HumanEval": 15,
+        "MBPP": 12,
+        "APPS": 8
+      },
+      "cross_benchmark_validation": {
+        "HumanEval": 0.85,
+        "MBPP": 0.82,
+        "APPS": 0.78
+      },
+      "validation_metrics": {
+        "literature_support": 0.9,
+        "empirical_validation": 0.8,
+        "coverage": 0.6,
+        "specificity": 0.8,
+        "actionability": 0.7,
+        "reliability": 0.9,
+        "overall_score": 0.7499999999999999
+      },
+      "source": "PatternSource.LITERATURE",
+      "representative_count": 1,
+      "instance_diversity_score": 0.0,
+      "pattern_signature": "",
+      "pattern_coverage": 0.0,
+      "annotation_completeness": 0.0,
+      "expert_consensus_score": 0.0,
+      "pattern_coherence": 0.0,
+      "expert_verification": false,
+      "confidence": 0.7499999999999999,
+      "last_updated": "2025-08-14 10:01:40.535437",
+      "usage_count": 0
+    },
+    {
+      "pattern_id": "lit_logical_errors_off_by_one",
+      "category": "code_generation",
+      "subcategory": "logical_errors",
+      "description": "Off-by-one error in loops or indexing",
+      "severity": "PatternSeverity.MEDIUM",
+      "defining_triggers": [
+        "Algorithm logic flaws",
+        "Control flow errors",
+        "Condition evaluation mistakes",
+        "Loop logic problems"
+      ],
+      "trigger_frequency": {
+        "algorithm_flaws": 0.7,
+        "control_flow": 0.6,
+        "conditions": 0.5,
+        "loops": 0.4
+      },
+      "trigger_contexts": [
+        "algorithm_implementation",
+        "conditional_logic",
+        "loop_constructs",
+        "recursion"
+      ],
+      "examples": [
+        {
+          "input_text": "Write a function to find the maximum element in a list",
+          "model_output": "def find_max(arr):\n    max_val = arr[0]\n    for i in range(len(arr)):\n        if arr[i] > max_val:\n            max_val = arr[i]\n    return max_val",
+          "reference_output": "def find_max(arr):\n    if not arr: return None\n    max_val = arr[0]\n    for i in range(1, len(arr)):\n        if arr[i] > max_val:\n            max_val = arr[i]\n    return max_val",
+          "failure_type": "logical_error",
+          "failure_description": "Inefficient loop starting from index 0",
+          "severity_score": 0.6,
+          "detection_method": "loop analysis",
+          "source_dataset": "HumanEval",
+          "expert_verified": false,
+          "validation_score": 0.0
+        }
+      ],
+      "detection_criteria": [
+        "inefficient loop",
+        "redundant comparison",
+        "boundary condition"
+      ],
+      "failure_indicators": [
+        "performance issue",
+        "redundant operation"
+      ],
+      "hypothesised_causes": [
+        "Algorithmic reasoning limitations",
+        "Training data logical bias",
+        "Problem decomposition failures",
+        "Pattern matching over logical reasoning"
+      ],
+      "causal_evidence": {
+        "reasoning_limitations": 0.9,
+        "training_bias": 0.65,
+        "decomposition_failures": 0.8,
+        "pattern_preference": 0.7
+      },
+      "causal_relationships": [
+        [
+          "reasoning_limitations",
+          "algorithm_flaws",
+          0.9
+        ],
+        [
+          "training_bias",
+          "pattern_overfitting",
+          0.65
+        ],
+        [
+          "decomposition_failures",
+          "complex_logic_errors",
+          0.85
+        ]
+      ],
+      "counterfactuals": [
+        {
+          "fix_description": "Start loop from index 1 to avoid redundant comparison",
+          "fix_code": "for i in range(1, len(arr)):",
+          "fix_text": "",
+          "fix_strategy": "loop_optimization",
+          "success_rate": 0.85,
+          "implementation_difficulty": "medium",
+          "validation_results": {}
+        }
+      ],
+      "prevention_strategies": [
+        "Review loop boundaries",
+        "Consider edge cases"
+      ],
+      "remediation_effectiveness": {
+        "algorithm_training": 0.85,
+        "step_by_step_prompts": 0.8,
+        "logical_validation": 0.75,
+        "test_case_verification": 0.9
+      },
+      "quantitative_metrics": {
+        "total_examples": 1,
+        "trigger_count": 4,
+        "cause_hypotheses_count": 4,
+        "remediation_strategies_count": 2,
+        "annotation_density": 0.9333333333333333
+      },
+      "qualitative_metrics": {
+        "expert_rating": 0.8,
+        "coherence": 0.85
+      },
+      "benchmark_sources": [
+        "HumanEval",
+        "MBPP",
+        "APPS"
+      ],
+      "source_distribution": {
+        "HumanEval": 15,
+        "MBPP": 12,
+        "APPS": 8
+      },
+      "cross_benchmark_validation": {
+        "HumanEval": 0.85,
+        "MBPP": 0.82,
+        "APPS": 0.78
+      },
+      "validation_metrics": {
+        "literature_support": 0.9,
+        "empirical_validation": 0.8,
+        "coverage": 0.6,
+        "specificity": 0.8,
+        "actionability": 0.7,
+        "reliability": 0.9,
+        "overall_score": 0.7499999999999999
+      },
+      "source": "PatternSource.LITERATURE",
+      "representative_count": 1,
+      "instance_diversity_score": 0.0,
+      "pattern_signature": "",
+      "pattern_coverage": 0.0,
+      "annotation_completeness": 0.0,
+      "expert_consensus_score": 0.0,
+      "pattern_coherence": 0.0,
+      "expert_verification": false,
+      "confidence": 0.7499999999999999,
+      "last_updated": "2025-08-14 10:01:40.535454",
+      "usage_count": 0
+    },
+    {
+      "pattern_id": "dataset_HumanEval_failures",
+      "category": "code_generation",
+      "subcategory": "dataset_analysis",
+      "description": "Common failures in HumanEval code generation",
+      "severity": "PatternSeverity.MEDIUM",
+      "defining_triggers": [
+        "dataset_specific_trigger",
+        "analysis_pattern"
+      ],
+      "trigger_frequency": {
+        "dataset_trigger": 0.6
+      },
+      "trigger_contexts": [
+        "dataset_analysis",
+        "benchmark_evaluation"
+      ],
+      "examples": [
+        {
+          "input_text": "Write a function to check if a number is prime",
+          "model_output": "def is_prime(n):\n    if n < 2: return False\n    for i in range(2, n):\n        if n % i == 0: return False\n    return True",
+          "reference_output": "def is_prime(n):\n    if n < 2: return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0: return False\n    return True",
+          "failure_type": "inefficiency",
+          "failure_description": "Inefficient prime checking algorithm",
+          "severity_score": 0.5,
+          "detection_method": "performance analysis",
+          "source_dataset": "HumanEval",
+          "expert_verified": false,
+          "validation_score": 0.0
+        }
+      ],
+      "detection_criteria": [
+        "inefficient algorithm",
+        "performance issue"
+      ],
+      "failure_indicators": [
+        "timeout",
+        "slow execution"
+      ],
+      "hypothesised_causes": [
+        "dataset_bias",
+        "analysis_limitation"
+      ],
+      "causal_evidence": {
+        "dataset_bias": 0.7,
+        "analysis_limitation": 0.6
+      },
+      "causal_relationships": [
+        [
+          "dataset_bias",
+          "failure_pattern",
+          0.7
+        ]
+      ],
+      "counterfactuals": [
+        {
+          "fix_description": "Optimize prime checking with square root",
+          "fix_code": "for i in range(2, int(n**0.5) + 1):",
+          "fix_text": "",
+          "fix_strategy": "algorithm_optimization",
+          "success_rate": 0.9,
+          "implementation_difficulty": "medium",
+          "validation_results": {}
+        }
+      ],
+      "prevention_strategies": [
+        "Consider algorithm complexity",
+        "Test with large inputs"
+      ],
+      "remediation_effectiveness": {
+        "dataset_improvement": 0.75
+      },
+      "quantitative_metrics": {
+        "total_examples": 1,
+        "trigger_count": 2,
+        "cause_hypotheses_count": 2,
+        "remediation_strategies_count": 2,
+        "annotation_density": 0.9333333333333333
+      },
+      "qualitative_metrics": {
+        "dataset_quality": 0.8
+      },
+      "benchmark_sources": [
+        "HumanEval",
+        "MBPP"
+      ],
+      "source_distribution": {
+        "HumanEval": 8,
+        "MBPP": 6
+      },
+      "cross_benchmark_validation": {
+        "HumanEval": 0.75,
+        "MBPP": 0.7
+      },
+      "validation_metrics": {
+        "dataset_support": 0.85,
+        "coverage": 0.6,
+        "specificity": 0.6,
+        "actionability": 0.7,
+        "reliability": 0.7,
+        "overall_score": 0.6499999999999999
+      },
+      "source": "PatternSource.DATASET",
+      "representative_count": 1,
+      "instance_diversity_score": 0.0,
+      "pattern_signature": "",
+      "pattern_coverage": 0.0,
+      "annotation_completeness": 0.0,
+      "expert_consensus_score": 0.0,
+      "pattern_coherence": 0.0,
+      "expert_verification": false,
+      "confidence": 0.6499999999999999,
+      "last_updated": "2025-08-14 10:01:40.535805",
+      "usage_count": 0
+    }
+  ],
+  "usage_statistics": {
+    "lit_syntax_errors_missing_colon": {
+      "usage_count": 0,
+      "success_rate": 0.0,
+      "last_used": null
+    },
+    "lit_syntax_errors_undefined_variable": {
+      "usage_count": 0,
+      "success_rate": 0.0,
+      "last_used": null
+    },
+    "lit_logical_errors_off_by_one": {
+      "usage_count": 0,
+      "success_rate": 0.0,
+      "last_used": null
+    },
+    "dataset_HumanEval_failures": {
+      "usage_count": 0,
+      "success_rate": 0.0,
+      "last_used": null
+    }
+  },
+  "validation_history": {},
+  "export_timestamp": "2025-08-14T10:01:40.536078"
+}

@@ -1,0 +1,52 @@
+{
+  "runs": [
+    {
+      "run_id": "run_20250814_100136",
+      "timestamp": "2025-08-14T10:11:10.634420",
+      "total_processing_time": 15.034658908843994,
+      "summary": {
+        "total_instances": 4,
+        "total_successful_analyses": 4,
+        "overall_success_rate": 1.0,
+        "dataset_specific_metrics": {
+          "humaneval_execution_success_rate": 1.0,
+          "truthfulqa_truthfulness_rate": 0.0
+        }
+      },
+      "benchmark_results_path": "benchmark_results/run_20250814_100136",
+      "test_results_path": "test_results/humaneval/run_20250814_100136, test_results/truthfulqa/run_20250814_100136",
+      "files_generated": {
+        "benchmark_report": "benchmark_results/run_20250814_100136/benchmark_report.md",
+        "comprehensive_results": "benchmark_results/run_20250814_100136/comprehensive_benchmark_results.json",
+        "interactive_dashboard": "benchmark_results/run_20250814_100136/comprehensive_benchmark_analysis.html",
+        "humaneval_report": "test_results/humaneval/run_20250814_100136/humaneval_analysis_report.json",
+        "truthfulqa_report": "test_results/truthfulqa/run_20250814_100136/truthfulqa_analysis_report.json"
+      }
+    },
+    {
+      "run_id": "run_20250813_160854",
+      "timestamp": "2025-08-13T16:19:25.271097",
+      "total_processing_time": 41.24484705924988,
+      "summary": {
+        "total_instances": 4,
+        "total_successful_analyses": 4,
+        "overall_success_rate": 1.0,
+        "dataset_specific_metrics": {
+          "humaneval_execution_success_rate": 1.0,
+          "truthfulqa_truthfulness_rate": 0.0
+        }
+      },
+      "benchmark_results_path": "benchmark_results/run_20250813_160854",
+      "test_results_path": "test_results/humaneval/run_20250813_160854, test_results/truthfulqa/run_20250813_160854",
+      "files_generated": {
+        "benchmark_report": "benchmark_results/run_20250813_160854/benchmark_report.md",
+        "comprehensive_results": "benchmark_results/run_20250813_160854/comprehensive_benchmark_results.json",
+        "interactive_dashboard": "benchmark_results/run_20250813_160854/comprehensive_benchmark_analysis.html",
+        "humaneval_report": "test_results/humaneval/run_20250813_160854/humaneval_analysis_report.json",
+        "truthfulqa_report": "test_results/truthfulqa/run_20250813_160854/truthfulqa_analysis_report.json"
+      }
+    }
+  ],
+  "last_updated": "2025-08-14T10:11:11.425032",
+  "total_runs": 2
+}

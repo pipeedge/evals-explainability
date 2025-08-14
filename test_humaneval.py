@@ -115,10 +115,11 @@ class HumanEvalTester:
     with 164 hand-written programming problems with unit tests.
     """
     
-    def __init__(self, llm_wrapper=None, pattern_library=None, results_subdir=None):
+    def __init__(self, llm_wrapper=None, pattern_library=None, surrogate_integration=None, results_subdir=None):
         self.engine = ExplainabilityEngine(
             llm_wrapper or create_default_llm_wrapper(), 
-            pattern_library=pattern_library
+            pattern_library=pattern_library,
+            surrogate_integration=surrogate_integration
         )
         self.dataset_path = "datasets/humaneval"
         

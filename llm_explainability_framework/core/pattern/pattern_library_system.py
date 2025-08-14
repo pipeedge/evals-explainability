@@ -17,8 +17,18 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from enum import Enum
 import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMER_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMER_AVAILABLE = False
+    print("⚠️  Warning: sentence-transformers not available. Using fallback similarity computation.")
+try:
+    from sklearn.metrics.pairwise import cosine_similarity
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    print("⚠️  Warning: scikit-learn not available. Using fallback similarity computation.")
 import requests
 from pathlib import Path
 
@@ -234,7 +244,17 @@ class PatternLibrarySystem:
     """
     
     def __init__(self, embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        self.embedding_model = SentenceTransformer(embedding_model_name)
+        if SENTENCE_TRANSFORMER_AVAILABLE:
+            try:
+                self.embedding_model = SentenceTransformer(embedding_model_name)
+                print(f"✅ Loaded embedding model: {embedding_model_name}")
+            except Exception as e:
+                print(f"⚠️  Warning: Failed to load embedding model: {e}")
+                print("🔄 Using fallback similarity computation")
+                self.embedding_model = None
+        else:
+            print("🔄 Using fallback similarity computation (no sentence-transformers)")
+            self.embedding_model = None
         self.patterns = {}
         self.usage_statistics = {}
         self.validation_history = {}
@@ -304,6 +324,13 @@ class PatternLibrarySystem:
         
     def collect_patterns_from_literature(self) -> List[FailurePattern]:
         """Collect patterns from academic literature"""
+        
+        # Check if patterns already exist to avoid regeneration
+        if self.patterns:
+            existing_lit_patterns = [p for p in self.patterns.values() if p.source == PatternSource.LITERATURE]
+            if existing_lit_patterns:
+                print(f"📚 Found {len(existing_lit_patterns)} existing literature patterns, skipping regeneration")
+                return existing_lit_patterns
         
         print("📚 Collecting patterns from literature...")
         
@@ -417,7 +444,6 @@ class PatternLibrarySystem:
                     # Detection and Identification
                     detection_criteria=pattern_data["detection_criteria"],
                     failure_indicators=pattern_data["failure_indicators"],
-                    pattern_signature=f"{category}_{subcategory}_signature",
                     
                     # Research Requirements - Hypothesised Causes
                     hypothesised_causes=self._generate_hypothesised_causes(category, subcategory),
@@ -429,21 +455,22 @@ class PatternLibrarySystem:
                     prevention_strategies=pattern_data["prevention_strategies"],
                     remediation_effectiveness=self._calculate_remediation_effectiveness(category),
                     
-                    # Research Requirements - Benchmark Sources
+                    # Quality Assessment - Quantitative
+                    quantitative_metrics={},  # Will be computed in __post_init__
+                    
+                    # Quality Assessment - Qualitative
+                    qualitative_metrics={"expert_rating": 0.8, "coherence": 0.85},
+                    
+                    # Benchmark Sources (Research Requirement)
                     benchmark_sources=["HumanEval", "MBPP", "APPS"],  # Code generation benchmarks
                     source_distribution={"HumanEval": 15, "MBPP": 12, "APPS": 8},
                     cross_benchmark_validation={"HumanEval": 0.85, "MBPP": 0.82, "APPS": 0.78},
                     
-                    # Quality Assessment
-                    qualitative_metrics={"expert_rating": 0.8, "coherence": 0.85},
-                    expert_consensus_score=0.8,
-                    pattern_coherence=0.85,
-                    
-                    # Validation and Metadata
+                    # Validation Data
                     validation_metrics={"literature_support": 0.9, "empirical_validation": 0.8},
-                    source=PatternSource.LITERATURE,
-                    expert_verification=True,
-                    confidence=0.8
+                    
+                    # Metadata
+                    source=PatternSource.LITERATURE
                 )
                 patterns.append(pattern)
         
@@ -584,6 +611,13 @@ class PatternLibrarySystem:
     def collect_patterns_from_datasets(self) -> List[FailurePattern]:
         """Collect patterns from benchmark datasets"""
         
+        # Check if patterns already exist to avoid regeneration
+        if self.patterns:
+            existing_dataset_patterns = [p for p in self.patterns.values() if p.source == PatternSource.DATASET]
+            if existing_dataset_patterns:
+                print(f"📊 Found {len(existing_dataset_patterns)} existing dataset patterns, skipping regeneration")
+                return existing_dataset_patterns
+        
         print("📊 Collecting patterns from datasets...")
         
         # Simulate dataset analysis
@@ -625,14 +659,45 @@ class PatternLibrarySystem:
                 subcategory="dataset_analysis",
                 description=pattern_data["description"],
                 severity=PatternSeverity.MEDIUM,
+                
+                # Research Requirements - Defining Triggers
+                defining_triggers=["dataset_specific_trigger", "analysis_pattern"],
+                trigger_frequency={"dataset_trigger": 0.6},
+                trigger_contexts=["dataset_analysis", "benchmark_evaluation"],
+                
+                # Research Requirements - Representative Instances
                 examples=pattern_data["examples"],
+                
+                # Detection and Identification
                 detection_criteria=pattern_data["detection_criteria"],
                 failure_indicators=pattern_data["failure_indicators"],
+                
+                # Research Requirements - Hypothesised Causes
+                hypothesised_causes=["dataset_bias", "analysis_limitation"],
+                causal_evidence={"dataset_bias": 0.7, "analysis_limitation": 0.6},
+                causal_relationships=[("dataset_bias", "failure_pattern", 0.7)],
+                
+                # Research Requirements - Remediation Strategies
                 counterfactuals=pattern_data["counterfactuals"],
                 prevention_strategies=pattern_data["prevention_strategies"],
+                remediation_effectiveness={"dataset_improvement": 0.75},
+                
+                # Quality Assessment - Quantitative
+                quantitative_metrics={},  # Will be computed in __post_init__
+                
+                # Quality Assessment - Qualitative
+                qualitative_metrics={"dataset_quality": 0.8},
+                
+                # Benchmark Sources (Research Requirement)
+                benchmark_sources=["HumanEval", "MBPP"],
+                source_distribution={"HumanEval": 8, "MBPP": 6},
+                cross_benchmark_validation={"HumanEval": 0.75, "MBPP": 0.70},
+                
+                # Validation Data
                 validation_metrics={"dataset_support": 0.85},
-                source=PatternSource.DATASET,
-                confidence=0.75
+                
+                # Metadata
+                source=PatternSource.DATASET
             )
             patterns.append(pattern)
         
@@ -659,6 +724,13 @@ class PatternLibrarySystem:
                 subcategory="llm_analysis",
                 description=f"LLM-generated pattern for failure type: {example.get('failure_type', 'unknown')}",
                 severity=PatternSeverity.MEDIUM,
+                
+                # Research Requirements - Defining Triggers
+                defining_triggers=["llm_identified_trigger", "ai_analysis"],
+                trigger_frequency={"llm_trigger": 0.5},
+                trigger_contexts=["llm_analysis", "ai_generated"],
+                
+                # Research Requirements - Representative Instances
                 examples=[
                     PatternExample(
                         input_text=example.get("input", ""),
@@ -671,8 +743,17 @@ class PatternLibrarySystem:
                         source_dataset="llm_generated"
                     )
                 ],
+                
+                # Detection and Identification
                 detection_criteria=["llm_identified_pattern"],
                 failure_indicators=["llm_detected_issue"],
+                
+                # Research Requirements - Hypothesised Causes
+                hypothesised_causes=["llm_identified_cause", "ai_analysis_limitation"],
+                causal_evidence={"llm_identified_cause": 0.6, "ai_analysis_limitation": 0.5},
+                causal_relationships=[("llm_identified_cause", "failure_pattern", 0.6)],
+                
+                # Research Requirements - Remediation Strategies
                 counterfactuals=[
                     CounterfactualFix(
                         fix_description="LLM-suggested fix",
@@ -682,9 +763,24 @@ class PatternLibrarySystem:
                     )
                 ],
                 prevention_strategies=["LLM-suggested prevention"],
+                remediation_effectiveness={"llm_suggestion": 0.7},
+                
+                # Quality Assessment - Quantitative
+                quantitative_metrics={},  # Will be computed in __post_init__
+                
+                # Quality Assessment - Qualitative
+                qualitative_metrics={"llm_quality": 0.6},
+                
+                # Benchmark Sources (Research Requirement)
+                benchmark_sources=["LLM_Generated"],
+                source_distribution={"LLM_Generated": 1},
+                cross_benchmark_validation={"LLM_Generated": 0.6},
+                
+                # Validation Data
                 validation_metrics={"llm_confidence": 0.7},
-                source=PatternSource.LLM_GENERATED,
-                confidence=0.6
+                
+                # Metadata
+                source=PatternSource.LLM_GENERATED
             )
             llm_generated_patterns.append(pattern)
         

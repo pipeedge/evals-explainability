@@ -48,15 +48,15 @@ class ExplainabilityEngine:
     comprehensive LLM failure analysis and explanation generation.
     """
     
-    def __init__(self, llm_wrapper: LLMWrapper, config: Optional[Dict[str, Any]] = None, pattern_library: Optional[Any] = None):
+    def __init__(self, llm_wrapper: LLMWrapper, config: Optional[Dict[str, Any]] = None, pattern_library: Optional[Any] = None, surrogate_integration: Optional[Any] = None):
         self.llm = llm_wrapper
         self.config = config or self._get_default_config()
         
-        # Initialize core components
+        # Initialize core components with enhanced capabilities
         self.failure_classifier = FailureClassifier(llm_wrapper, pattern_library=pattern_library)
         self.root_cause_analyzer = RootCauseAnalyzer(llm_wrapper)
         self.recommendation_engine = RecommendationEngine(llm_wrapper)
-        self.metrics_evaluator = ExplainabilityMetrics()
+        self.metrics_evaluator = ExplainabilityMetrics(surrogate_integration=surrogate_integration)
         
         # Performance tracking
         self.analysis_history = []

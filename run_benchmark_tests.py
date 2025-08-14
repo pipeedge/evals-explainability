@@ -73,7 +73,8 @@ from llm_explainability_framework import (
     StakeholderType
 )
 from llm_explainability_framework.visualization.reporter import ExplainabilityReporter
-from pattern_library_system import PatternLibrarySystem
+from llm_explainability_framework.core.pattern import PatternLibrarySystem
+from llm_explainability_framework.core.surrogate import SurrogateModelIntegration
 
 # Import our test modules
 from test_humaneval import HumanEvalTester
@@ -95,25 +96,61 @@ class BenchmarkTestRunner:
         self.base_output_dir = Path(output_dir)
         self.output_dir = self.base_output_dir / f"run_{timestamp}"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.test_results_subdir = f"run_{timestamp}"  # Add this line
         
         print(f"📁 Benchmark results will be saved to: {self.output_dir}")
         
-        # Initialize pattern library
-        print("🔧 Initializing Pattern Library for Benchmark Testing...")
+        # Initialize enhanced components
+        print("🔧 Initializing Enhanced MADF Framework for Benchmark Testing...")
+        
+        # Initialize surrogate model integration
+        print("🤖 Initializing Surrogate Model Integration...")
+        try:
+            self.surrogate_integration = SurrogateModelIntegration()
+            print("✅ Surrogate model integration ready")
+        except Exception as e:
+            print(f"⚠️  Warning: Surrogate model integration failed: {e}")
+            print("🔄 Using fallback attention computation")
+            self.surrogate_integration = None
+        
+        # Initialize pattern library with persistence
+        print("📚 Initializing Pattern Library System...")
         self.pattern_library = PatternLibrarySystem()
         
-        # Pre-load patterns from multiple sources (best-effort)
-        try:
-            literature_patterns = self.pattern_library.collect_patterns_from_literature()
-            dataset_patterns = self.pattern_library.collect_patterns_from_datasets()
-            print(f"✅ Pattern library initialized with {len(self.pattern_library.patterns)} patterns")
-        except Exception as e:
-            print(f"⚠️ Warning: Pattern library initialization partial failure: {e}")
+        # Try to load existing patterns first
+        pattern_cache_file = Path("pattern_library_cache.json")
+        if pattern_cache_file.exists():
+            try:
+                self.pattern_library.import_patterns(str(pattern_cache_file))
+                print(f"✅ Loaded {len(self.pattern_library.patterns)} patterns from cache")
+            except Exception as e:
+                print(f"⚠️ Warning: Failed to load pattern cache: {e}")
+                print("🔄 Regenerating patterns...")
+                self._regenerate_patterns()
+        else:
+            print("🔄 No pattern cache found, generating patterns...")
+            self._regenerate_patterns()
         
-        # Initialize testers with pattern library and shared timestamp for consistent subfolder
-        self.test_results_subdir = f"run_{timestamp}"
-        self.humaneval_tester = HumanEvalTester(self.llm_wrapper, pattern_library=self.pattern_library, results_subdir=self.test_results_subdir)
-        self.truthfulqa_tester = TruthfulQATester(self.llm_wrapper, pattern_library=self.pattern_library, results_subdir=self.test_results_subdir)
+        # Save patterns for future runs
+        try:
+            self.pattern_library.export_patterns(str(pattern_cache_file))
+            print(f"💾 Saved {len(self.pattern_library.patterns)} patterns to cache")
+        except Exception as e:
+            print(f"⚠️ Warning: Failed to save pattern cache: {e}")
+        
+        # Initialize testers with enhanced components and shared timestamp for consistent subfolder
+        self.humaneval_tester = HumanEvalTester(
+            self.llm_wrapper, 
+            pattern_library=self.pattern_library, 
+            surrogate_integration=self.surrogate_integration,
+            results_subdir=self.test_results_subdir
+        )
+        self.truthfulqa_tester = TruthfulQATester(
+            self.llm_wrapper, 
+            pattern_library=self.pattern_library, 
+            surrogate_integration=self.surrogate_integration,
+            results_subdir=self.test_results_subdir
+        )
         
         # Initialize comprehensive reporter
         self.reporter = ExplainabilityReporter(output_dir=str(self.output_dir))
@@ -124,6 +161,15 @@ class BenchmarkTestRunner:
             "datasets": {},
             "summary": {}
         }
+    
+    def _regenerate_patterns(self):
+        """Regenerate patterns from multiple sources"""
+        try:
+            literature_patterns = self.pattern_library.collect_patterns_from_literature()
+            dataset_patterns = self.pattern_library.collect_patterns_from_datasets()
+            print(f"✅ Pattern library initialized with {len(self.pattern_library.patterns)} patterns")
+        except Exception as e:
+            print(f"⚠️ Warning: Pattern library initialization partial failure: {e}")
     
     def run_humaneval_benchmark(self, max_instances: Optional[int] = None) -> Dict[str, Any]:
         """
@@ -368,7 +414,7 @@ class BenchmarkTestRunner:
             "timestamp": comprehensive_results["timestamp"],
             "total_processing_time": comprehensive_results["total_processing_time"],
             "summary": comprehensive_results["summary"],
-            "benchmark_results_path": str(self.output_dir.relative_to(Path.cwd())),
+            "benchmark_results_path": str(self.output_dir),
             "test_results_path": f"test_results/humaneval/{self.test_results_subdir}, test_results/truthfulqa/{self.test_results_subdir}",
             "files_generated": {
                 "benchmark_report": str(self.output_dir / "benchmark_report.md"),
